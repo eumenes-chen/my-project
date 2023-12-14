@@ -1,3 +1,5 @@
+node 17.3.0
+
 # 2023vite-vue3practise
 
 This template should help get you started developing with Vue 3 in Vite.
