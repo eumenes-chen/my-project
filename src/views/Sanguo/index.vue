@@ -414,7 +414,7 @@ db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
 <style scoped lang="scss">
 #sanguo {
   position: relative;
-  height: 100%;
+  height: calc(100vh - 50px);
 
   .head {
     height: 60px;
@@ -450,8 +450,9 @@ db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
   }
 
   .main {
-    height: calc(100% - 60px);
+    height: calc(100% - 70px);
     display: flex;
+    overflow: hidden;
 
     .left-main {
       width: 20%;
@@ -475,6 +476,7 @@ db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
         height: 100%;
         float: left;
         padding: 10px;
+        box-sizing: border-box;
         position: relative;
 
         .view-container {
