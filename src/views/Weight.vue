@@ -467,8 +467,8 @@ onMounted(() => {
 <style scoped lang="scss">
 .weight {
   width: 100%;
-  height: 100%;
-  background-color: orange;
+  height: calc(100vh - 50px);
+  background-color: rgb(255, 240, 212);
 
   .info {
     height: 60px;
@@ -486,9 +486,9 @@ onMounted(() => {
 
   #echart-dom {
     width: 90%;
-    padding: 50px 0;
+    // padding: 50px 0;
     margin: 0 5%;
-    height: 800px;
+    height: calc(100% - 60px);
     background-color: white;
   }
 }
