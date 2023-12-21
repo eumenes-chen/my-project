@@ -503,7 +503,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="weight">
+  <div id="weight">
     <div class="info">
       <div class="info-box">
         今日体重：{{ todayWeight }} 斤
@@ -529,10 +529,12 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-.weight {
+@import "@/style/index.scss";
+#weight {
   width: 100%;
   height: calc(100vh - 50px);
-  background-color: rgb(255, 240, 212);
+  background-color: rgb(255, 251, 243);
+  overflow: hidden;
 
   .info {
     height: 60px;
@@ -541,16 +543,14 @@ onMounted(() => {
     justify-content: space-around;
 
     .info-box {
-      // width: 240px;
       margin: 0 10px;
       line-height: 60px;
-      font-size: 20px;
+      font-size: 16px;
     }
   }
 
   #echart-dom {
     width: 90%;
-    // padding: 50px 0;
     margin: 0 5%;
     height: calc(100% - 60px);
     background-color: white;

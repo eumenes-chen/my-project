@@ -19,7 +19,7 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/Weight.vue')
+      component: () => import('../views/Weight/index.vue')
     },
     {
       path: '/sanguo',
@@ -30,6 +30,11 @@ const router = createRouter({
       path: '/iframe',
       name: 'iframe',
       component: () => import('../views/Iframe/index.vue')
+    },
+    {
+      path: '/manage',
+      name: 'manage',
+      component: () => import('../views/Manage/index.vue')
     },
   ]
 })

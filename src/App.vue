@@ -1,22 +1,15 @@
 <script setup>
-import { RouterLink, RouterView, useRouter } from "vue-router";
-import "./style/index.scss";
+import { RouterLink, RouterView } from "vue-router";
 import { onMounted } from "vue";
 import Nav from "./components/Nav.vue";
 
-const router = useRouter();
 const navList = [
   { title: "首页", route: "home" },
   { title: "计划", route: "weight" },
   { title: "历史", route: "sanguo" },
   { title: "测试", route: "iframe" },
+  { title: "管理系统", route: "manage" },
 ];
-const chooseNav = (e) => {
-  let routerName = e.target.getAttribute("routerName");
-  console.log("点击了nav", routerName);
-  router.push({ path: routerName });
-  // VueRouter.push({path:'/weight'})
-};
 onMounted(() => {
   console.log("app的mounted：");
 });
@@ -34,26 +27,25 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
+@import "@/style/index.scss";
 #app-view {
-  // height: 100vh;
   margin: 0;
   padding: 0;
-  width: 100%;
   .view-container {
-    // height: calc(100vh - 50px);
-    width: 1280px;
+    width: $container-width;
     margin: 0 auto;
     padding-top: 50px;
     box-sizing: border-box;
-    min-height: 100vh;
-    overflow: auto;
-    .scroll-container{
-      height: auto;
-      min-height: calc(100vh - 50px);
+    height: 100vh;
+    .scroll-container {
+      height: 100%;
+      max-height: calc(100vh - 50px);
       position: relative;
-      width: 100%;
+      width: 100%;    
+      overflow-x: clip;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
   }
 }
-
 </style>

@@ -16,6 +16,7 @@ export default class Http {
         )
         axios.interceptors.response.use(
             (response) => {
+                console.log('返回错误',response);
                 return response.data || response;
             },
             (error) => {

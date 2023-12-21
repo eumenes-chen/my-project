@@ -59,6 +59,7 @@ onMounted(() => {
     rgb(156, 252, 255),
     rgb(214, 254, 255)
   );
+  z-index: 100;
   top: 0;
   /* background-color: orange; */
   .nav-list {
@@ -70,11 +71,11 @@ onMounted(() => {
     .nav-item {
       width: 100px;
       text-align: center;
-      font-size: 18px;
+      font-size: 16px;
       line-height: 50px;
       color: rgb(88, 88, 88);
       letter-spacing: 3px;
-      margin-right: 14px;
+      margin-right: 10px;
       &:hover {
         font-weight: 800;
         color: rgb(0, 85, 85);

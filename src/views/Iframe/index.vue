@@ -1,7 +1,5 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-// import { Search } from '@element-plus/icons-vue'
-// import { ElMessage, ElMessageBox } from 'element-plus'
 
 const iframeSrc = ref('http://localhost:8080')
 // 渲染完成
@@ -16,7 +14,9 @@ onMounted(() => {
   </div>
 </template>
 <style scoped lang="scss">
+@import "@/style/index.scss";
 #Iframe{
+  height: 1000px;
   .iframe-view{
     width: 100%;
     height: 500px;
