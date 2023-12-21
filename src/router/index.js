@@ -26,6 +26,11 @@ const router = createRouter({
       name: 'sanguo',
       component: () => import('../views/Sanguo/index.vue')
     },
+    {
+      path: '/iframe',
+      name: 'iframe',
+      component: () => import('../views/Iframe/index.vue')
+    },
   ]
 })
 

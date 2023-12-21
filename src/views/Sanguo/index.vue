@@ -470,6 +470,7 @@ db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
     .right-main {
       width: 80%;
       height: 100%;
+      display: flex;
 
       .view-zone {
         width: 70%;

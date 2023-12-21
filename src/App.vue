@@ -7,8 +7,9 @@ import Nav from "./components/Nav.vue";
 const router = useRouter();
 const navList = [
   { title: "首页", route: "home" },
-  { title: "体重", route: "weight" },
-  { title: "三国", route: "sanguo" },
+  { title: "计划", route: "weight" },
+  { title: "历史", route: "sanguo" },
+  { title: "测试", route: "iframe" },
 ];
 const chooseNav = (e) => {
   let routerName = e.target.getAttribute("routerName");
