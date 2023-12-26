@@ -5,8 +5,8 @@ const todayWeight = ref('') // 今日体重
 const planWeight = ref(' ') // 计划体重
 const differWeight = ref('') // 超前几斤
 const differDate = ref('') // 超前几日
-const money = ref(2650) // 可用金额
-const breakLine = ref(129) // 待突破的体重线
+const money = ref(2400) // 可用金额
+const breakLine = ref(128) // 待突破的体重线
 // 减脂成果
 const realData = [
   155.6,
@@ -145,6 +145,11 @@ const realData = [
   129.3,//12/20
   128.7,//12/21
   128.8,//12/22
+  128.8,//12/23
+  130.2,//12/24
+  130.6,//12/25
+  129.9,//12/26
+  129.2,//12/27
 
 ]
 

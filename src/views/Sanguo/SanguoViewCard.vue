@@ -54,7 +54,7 @@ watchEffect(() => {
     .content {
         position: relative;
         margin: 5px 5px;
-        padding: 0 10px 0 5px;
+        padding: 0 5px 0 5px;
         background-color: rgb(202, 202, 202);
         border-radius: 8px;
         height: 40px;
@@ -64,7 +64,9 @@ watchEffect(() => {
             float: left;
             display: flex;
             flex-wrap: nowrap;
-
+            &>p{
+                margin: 0;
+            }
             .name {
                 width: 48px;
                 font-size: 14px;
