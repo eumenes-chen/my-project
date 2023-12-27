@@ -51,12 +51,10 @@ watchEffect(() => {
 
 // 点击menu事件
 const handleSelect = (key, keyPath) => {
-  console.log("点击了", key, keyPath, activeIndex.value);
   activeIndex.value = key;
   $router.push({ query: { active: key } });
 };
 const init = () => {
-  console.log("初始化", activeIndex.value);
   activeIndex.value = activeIndex.value || menuList[0].label;
 };
 // 渲染完成

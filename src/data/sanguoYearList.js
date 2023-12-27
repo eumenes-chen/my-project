@@ -673,6 +673,90 @@ const yearList = [
             { month: 12, title: '吴军攻合肥，不克；武陵五溪蛮夷叛吴' },
         ]
     },
+    {
+        year: 231,
+        title: '四次北伐',
+        info: [
+            { month: 3, title: '诸葛亮第四次北伐，战司马懿，粮尽而还' },
+        ]
+    },
+    {
+        year: 232,
+        title: '曹植病逝',
+        info: [
+            { month: 3, title: '孙权与公孙渊互派使者' },
+            { month: 6, title: '曹植病逝' },
+        ]
+    },
+    {
+        year: 233,
+        title: '三征合肥',
+        info: [
+            { month: 3, title: '孙权遣使封公孙渊为燕王' },
+            { month: 6, title: '公孙渊斩杀吴国使者，魏国拜公孙渊为大司马，封乐浪公' },
+            { month: 9, title: '孙权三征合肥，失败' },
+        ]
+    },
+    {
+        year: 234,
+        title: '五丈原',
+        info: [
+            { month: 3, title: '汉献帝刘协去世' },
+            { month: 6, title: '诸葛亮第五次北伐' },
+            { month: 9, title: '孙权率大军四攻合肥，失败' },
+            { month: 11, title: '诸葛亮病逝于五丈原' },
+            { month: 12, title: '魏延、杨仪决裂，魏延被杀' },
+        ]
+    },
+    {
+        year: 235,
+        title: '蒋琬得势',
+        info: [
+            { month: 3, title: '杨仪被费祎告发后死于狱中，蒋琬任大将军，费祎为尚书令' },
+            { month: 6, title: '魏国派刺客暗杀鲜卑轲比能' },
+        ]
+    },
+    {
+        year: 236,
+        title: '张昭病逝',
+        info: [
+            { month: 3, title: '张昭病逝' },
+            { month: 6, title: '高句丽王斩杀吴国使者，送首级于魏' },
+        ]
+    },
+    {
+        year: 237,
+        title: '燕国建立',
+        info: [
+            { month: 3, title: '魏国派毌丘俭讨伐叛魏独立的公孙渊失败，公孙渊自立为燕王' },
+            { month: 6, title: '魏明帝下令打造海船' },
+        ]
+    },
+    {
+        year: 238,
+        title: '讨伐燕国',
+        info: [
+            { month: 3, title: '魏明帝派刘昕、鲜于嗣从海路，司马懿从陆路讨伐公孙渊' },
+            { month: 6, title: '司马懿平定辽东，杀公孙渊' },
+            { month: 6, title: '日本邪马台国女王卑弥呼派使者到魏，魏封卑弥呼“亲魏倭王”' },
+            { month: 6, title: '姜维第一次北伐' },
+        ]
+    },
+    {
+        year: 239,
+        title: '曹睿驾崩',
+        info: [
+            { month: 3, title: '曹睿驾崩，曹芳继位，曹爽、司马懿辅政' },
+        ]
+    },
+    {
+        year: 240,
+        title: '遣使赴倭',
+        info: [
+            { month: 3, title: '蜀将张嶷平定蛮族之乱' },
+            { month: 6, title: '魏国带方太守遣使赴倭' },
+        ]
+    },
 ]
 
 export default yearList;

@@ -31,7 +31,6 @@ watch(path, (newVal) => {
   updateNavList();
 });
 const init = () => {
-  console.log("初始化", path.value);
 };
 const chooseNav = (e) => {
   let routerName = e.target.getAttribute("routerName");

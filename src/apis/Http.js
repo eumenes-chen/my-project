@@ -1,36 +1,28 @@
 import axios from 'axios'
 
-export default class Http {
-    constructor() {
-        this.$axios = axios
 
-        axios.interceptors.request.use(
-            config => {
-                if (config.method === 'get') {
-                    config.data = { unused: 0 }
-                    config.headers['content-type'] = 'application/x-www-form-urlencoded'
-                }
-                return config;
+let http = axios.create({
+    baseURL:'http://127.0.0.1:9090/api',
+    headers:{
+        "Access-Control-Allow-Origin": "*"
+    }
+})
+http.interceptors.request.use(
+    (res) => {
+        console.log('请求拦截',res);
+        return res;
+    },
+    (err) => {
+        return Promise.reject(err)
+    }
+)
+http.interceptors.response.use(
+    (res) => {
+        return res.data
+    },
+    (err) => {
+        return Promise.reject(err.data)
+    }
+)
 
-            }
-        )
-        axios.interceptors.response.use(
-            (response) => {
-                console.log('返回错误',response);
-                return response.data || response;
-            },
-            (error) => {
-                return Promise.reject(error);
-            }
-        )
-    }
-    get(url,data) {
-        return axios.get(url,data)
-    }
-    post(url, data = {}) {
-        return axios.post(url, data)
-    }
-    put(url, data = {}) {
-        return axios.put(url, data)
-    }
-}
+export default http;

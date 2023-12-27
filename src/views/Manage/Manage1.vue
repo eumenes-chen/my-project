@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, watchEffect, reactive, ref, nextTick } from "vue";
 
 // 列表数据
 let tableData = reactive([
@@ -42,6 +42,8 @@ let dialogType = ref(false);
 // 弹出框的表单数据
 let form = reactive({ title: "标题" });
 
+watchEffect(() => {});
+
 // 打开弹出框
 const handleClick = (type, index, row) => {
   if (type === "edit" || type === "add") {
@@ -49,8 +51,15 @@ const handleClick = (type, index, row) => {
     dialogType = type;
     console.log("添加或编辑", index, row, dialogVisible.value);
   } else if (type === "delete") {
-    console.log("删除",index,row);
+    console.log("删除", index, row);
   }
+  nextTick(() => {
+    let dialogDom = document.getElementsByClassName("el-dialog__body")[0];
+    console.log("??", dialogDom);
+    window.addEventListener("scroll", () => {
+      console.log("滚动");
+    },true);
+  });
 };
 
 // 点击弹出框内按钮
@@ -133,11 +142,30 @@ onMounted(() => {});
     >
       <template v-if="dialogType === 'edit'">
         <!-- 编辑弹出框 -->
-        <el-form :model="form">
-          <el-form-item label="title">
-            <el-input v-model="form.title"></el-input>
-          </el-form-item>
-        </el-form>
+        <div class="form-zone">
+          <el-form :model="form">
+            <el-form-item label="title">
+              <el-input v-model="form.title"></el-input>
+            </el-form-item>
+          </el-form>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+          <p>12313</p>
+        </div>
+
         <div class="button-zone">
           <el-button type="default" @click="dialogHandler('cancel')"
             >取消</el-button
@@ -207,11 +235,25 @@ onMounted(() => {});
     justify-content: right;
     align-items: top;
   }
-  .button-zone {
-    display: flex;
-    justify-content: right;
-  }
-
 }
-
+:deep(.el-dialog) {
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+  .el-dialog__body {
+    flex: 1;
+    box-sizing: border-box;
+    overflow: hidden;
+    .form-zone {
+      height: 85%;
+      overflow: auto;
+    }
+    .button-zone {
+      height: 15%;
+      display: flex;
+      justify-content: right;
+      align-items: center;
+    }
+  }
+}
 </style>

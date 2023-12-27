@@ -8,8 +8,8 @@ import SearchCard from "./SanguoSearchCard.vue";
 import ViewCard from "./SanguoViewCard.vue";
 // 引入数据
 import sanguoYearList from "@/data/sanguoYearList.js";
-// 引入请求
-import api from "../../apis/index";
+// // 引入请求
+import sanguoApi from "../../apis/sanguo";
 
 // 当前年份
 const selectedYear = ref(184);
@@ -90,8 +90,8 @@ const putCharacter = async (data) => {
     let params = {
       name: data.name,
     };
-    let res = await api.addView(params);
-    if (res.length) {
+    let res = await sanguoApi.addView(params);
+    if (res.data && res.data.length > 0) {
       viewHandler();
     }
   } else {
@@ -106,8 +106,8 @@ const outCharacter = async (item) => {
   let params = {
     name: item.name,
   };
-  let res = await api.deleteView(params);
-  if (res.ok) {
+  let res = await sanguoApi.deleteView(params);
+  if (res.data) {
     viewHandler();
   } else {
     ElMessage({
@@ -125,8 +125,8 @@ const deleteCharacter = (data) => {
   })
     .then(async () => {
       let id = data._id;
-      let res = await api.deleteCharacter({ _id: id });
-      if (res.ok) {
+      let res = await sanguoApi.deleteCharacter({ _id: id });
+      if (res.data) {
         const newList = searchList.value.filter((item) => {
           return item._id !== id;
         });
@@ -196,6 +196,7 @@ let dialogSubmit = () => {
 };
 // 上传数据
 const submitForm = async () => {
+  console.log('执行函数');
   let postData = {
     name: form.obj.name,
     birth: Number(form.obj.birth),
@@ -203,9 +204,11 @@ const submitForm = async () => {
     country: form.obj.country,
   };
   let data = "";
+  console.log('jixuzhixing',dialogType.value);
   if (dialogType.value === "create") {
-    data = await api.addCharacter(postData);
-    if (data) {
+    let res = await sanguoApi.addCharacter(postData);
+    if (res.data) {
+      data = res.data;
       searchList.value.push(data[0]);
       closeForm();
       ElMessage({
@@ -220,8 +223,8 @@ const submitForm = async () => {
     }
   } else {
     postData._id = form.obj._id;
-    data = await api.editCharacter(postData);
-    if (data.ok) {
+    res = await sanguoApi.editCharacter(postData);
+    if (res.data) {
       let newList = searchList.value.map((item) => {
         let obj = item._id === form.obj._id ? form.obj : item;
         return obj;
@@ -243,32 +246,42 @@ const submitForm = async () => {
 
 // 获取角色数据
 const characterHandler = async () => {
-  let data = await api.character();
-  searchList.value = data;
+  let res = await sanguoApi.character();
+  if (res.data) {
+    searchList.value = res.data || [];
+  }
 };
 // 获取id数据
 const viewHandler = async () => {
-  let data = await api.getView();
-  let arr = [];
-  data.forEach((item) => {
-    arr.push({ name: item.name });
-  });
-  viewCharacterHandler(arr);
+  let res = await sanguoApi.getView();
+  if (res.data) {
+    let viewList = res.data || [];
+    let arr = [];
+    viewList.forEach((item) => {
+      arr.push({ name: item.name });
+    });
+    console.log("到这里了",arr);
+    viewCharacterHandler(arr);
+  }
 };
 // 通过id获取角色数据
 const viewCharacterHandler = async (arr) => {
-  let params = { arr: arr };
-  let data = await api.getCharacter(params);
-  if (data instanceof Array) {
-    viewList.value = data;
-  } else {
-    viewList.value = [];
+  let params = {list:arr};
+  console.log("发起请求",params);
+  let res = await sanguoApi.getCharacter(params);
+  console.log('结果',res);
+  if (res.data) {
+    if (res.data instanceof Array) {
+      viewList.value = res.data;
+    } else {
+      viewList.value = [];
+    }
   }
 };
 // 清空视图内的角色
 const clearAll = async () => {
-  let res = await api.deleteAllView();
-  if (res.ok) {
+  let res = await sanguoApi.deleteAllView();
+  if (res.data) {
     viewHandler();
   }
 };
@@ -280,9 +293,9 @@ const searchHandler = async () => {
     let params = {
       str: searchValue.value,
     };
-    let res = await api.searchCharacter(params);
-    if (res.length) {
-      searchList.value = res;
+    let res = await sanguoApi.searchCharacter(params);
+    if (res.data && res.data.length > 0) {
+      searchList.value = res.data;
     } else {
       characterHandler();
     }
@@ -322,8 +335,8 @@ viewHandler();
 onMounted(() => {
   // 进入页面获取角色列表
 });
+// db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
 </script>
-db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
 <template>
   <div id="sanguo">
     <div class="head">
@@ -376,7 +389,7 @@ db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
         <div class="view-zone">
           <div class="view-container">
             <ViewCard
-              v-for="(item) in viewList"
+              v-for="item in viewList"
               :selectedYear="selectedYear"
               :data="item"
               :key="item._id"
@@ -503,13 +516,13 @@ db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
         margin: 2% 5%;
         padding: 2px 20px;
         box-sizing: border-box;
-        overflow-x: clip;;
+        overflow-x: clip;
         overflow-y: auto;
-        :deep(.el-collapse-item__wrap){
+        :deep(.el-collapse-item__wrap) {
           margin-right: 20px;
         }
-        :deep(.el-collapse-item__header){
-          &:hover{
+        :deep(.el-collapse-item__header) {
+          &:hover {
             font-weight: bold;
           }
         }
