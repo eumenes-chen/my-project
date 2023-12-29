@@ -27,6 +27,11 @@ const router = createRouter({
       component: () => import('../views/Sanguo/index.vue')
     },
     {
+      path: '/calendar',
+      name: 'calendar',
+      component: () => import('../views/Calendar/index.vue')
+    },
+    {
       path: '/iframe',
       name: 'iframe',
       component: () => import('../views/Iframe/index.vue')

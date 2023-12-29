@@ -7,6 +7,7 @@ const navList = [
   { title: "首页", route: "home" },
   { title: "计划", route: "weight" },
   { title: "历史", route: "sanguo" },
+  { title: "日历", route: "calendar" },
   { title: "测试", route: "iframe" },
   { title: "管理系统", route: "manage" },
 ];

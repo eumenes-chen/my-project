@@ -249,6 +249,7 @@ const characterHandler = async () => {
   let res = await sanguoApi.character();
   if (res.data) {
     searchList.value = res.data || [];
+    console.log('searchList',searchList.value);
   }
 };
 // 获取id数据
@@ -580,7 +581,8 @@ onMounted(() => {
 
         .search-container {
           height: 100%;
-          overflow: auto;
+          overflow: visible;
+          padding: 5px;
         }
       }
     }
