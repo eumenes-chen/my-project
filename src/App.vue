@@ -43,8 +43,8 @@ onMounted(() => {
       max-height: calc(100vh - 50px);
       position: relative;
       width: 100%;    
-      overflow-x: clip;
-      overflow-y: auto;
+      // overflow-x: clip;
+      // overflow-y: auto;
       box-sizing: border-box;
     }
   }
