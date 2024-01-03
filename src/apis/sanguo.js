@@ -37,6 +37,7 @@ class sanguoApi {
   }
   // 添加角色
   addCharacter(data) {
+    console.log('执行这里',data);
     return $http({
       url: `${http}/addcharacter`,
       method: "post",

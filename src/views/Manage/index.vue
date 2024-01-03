@@ -2,23 +2,23 @@
 import { onMounted, reactive, ref, watchEffect, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 // import { ElMenu, ElMenuItem, ElSubMenu } from "element-plus";
-import Manage1 from "./Manage1.vue";
+import Sanguo from "./Sanguo.vue";
 import Manage3 from "./Manage3.vue";
-console.log("组件", Manage1, Manage3);
+console.log("组件", Sanguo, Manage3);
 const componets = {
-  Manage1: Manage1,
+  Sanguo: Sanguo,
   Manage3: Manage3,
 };
 
 const $router = useRouter();
 
 const menuList = reactive([
-  { title: "管理系统1", label: "manage1", component: "Manage1" },
+  { title: "三国角色", label: "sanguo", component: "Sanguo" },
   {
     title: "管理系统2",
     label: "manage2",
     subMenu: [
-      { title: "子导航1", label: "child1", component: "Manage1" },
+      { title: "子导航1", label: "child1", component: "Manage3" },
       { title: "子导航2", label: "child2", component: "Manage3" },
     ],
   },
