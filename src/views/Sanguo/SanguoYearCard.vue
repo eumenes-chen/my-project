@@ -30,9 +30,6 @@ const changeCollapse = (active) => {
   emit("changeYear", active);
 };
 
-// setInterval(() => {
-//     console.log('????',activeName);
-// },2000)
 </script>
 <template>
   <div class="year-card">

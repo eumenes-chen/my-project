@@ -59,39 +59,62 @@ class sanguoApi {
       data: data,
     });
   }
+  // 增加展示在框中的角色
+  addViewCharacter(data) {
+    return $http({
+      url: `${http}/addviewcharacter`,
+      method: "post",
+      data: data,
+    });
+  }
+  // 移除展示在框中的角色
+  deleteViewCharacter(data) {
+    return $http({
+      url: `${http}/deleteviewcharacter`,
+      method: "post",
+      data: data,
+    });
+  }
+  // 清空展示在框中的角色
+  clearViewCharacter() {
+    return $http({
+      url: `${http}/clearviewcharacter`,
+      method: "post"
+    });
+  }
 
-    // 获取name
-    getView(data) {
-      return $http({
-        url: `${http}/view`,
-        method: "get",
-        data: data,
-      });
-    }
-      // 添加name
-      addView(data) {
+  // 获取name
+  getView(data) {
+    return $http({
+      url: `${http}/view`,
+      method: "get",
+      data: data,
+    });
+  }
+  // 添加name
+  addView(data) {
     return $http({
       url: `${http}/addview`,
       method: "post",
       data: data,
     });
   }
-    // 删除name
-    deleteView(data) {
-      return $http({
-        url: `${http}/deleteview`,
-        method: "post",
-        data: data,
-      });
-    }
-      // 删除全部name
-      deleteAllView(data) {
+  // 删除name
+  deleteView(data) {
+    return $http({
+      url: `${http}/deleteview`,
+      method: "post",
+      data: data,
+    });
+  }
+  // 删除全部name
+  deleteAllView(data) {
     return $http({
       url: `${http}/deleteallview`,
       method: "post",
       data: data,
     });
-  }  // 获取消息mock数据
+  } // 获取消息mock数据
   getMessage(data) {
     return $http({
       url: `http://localhost:9091/api/message`,

@@ -82,18 +82,27 @@ const changeYear = (active) => {
   selectedYear.value = active;
 };
 // 接收子传父事件，放入角色
-const putCharacter = async (data) => {
-  console.log('放入事件',data);
+const putCharacter = async (id) => {
   let target = viewList.value.find((item) => {
-    return item._id === data._id;
+    return item._id === id;
   });
   if (!target) {
-    let params = {
-      name: data.name,
-    };
-    let res = await sanguoApi.addView(params);
-    if (res.data && res.data.length > 0) {
-      viewHandler();
+    let params = { id };
+    let res = await sanguoApi.addViewCharacter(params);
+    if (res.data && res.code === "200") {
+      let newSearchList = [];
+      let newViewList = [];
+      JSON.parse(JSON.stringify(searchList.value)).forEach((item) => {
+        if (item._id === id) {
+          item.view = true;
+          newViewList.push(item);
+        } else if (item.view) {
+          newViewList.push(item);
+        }
+        newSearchList.push(item);
+      });
+      searchList.value = newSearchList;
+      viewList.value = newViewList;
     }
   } else {
     ElMessage({
@@ -103,13 +112,22 @@ const putCharacter = async (data) => {
   }
 };
 // 接收子传父事件，移出角色
-const outCharacter = async (item) => {
-  let params = {
-    name: item.name,
-  };
-  let res = await sanguoApi.deleteView(params);
-  if (res.data) {
-    viewHandler();
+const outCharacter = async (id) => {
+  let params = { id };
+  let res = await sanguoApi.deleteViewCharacter(params);
+  let newSearchList = [];
+  let newViewList = [];
+  if (res.code === "200") {
+    JSON.parse(JSON.stringify(searchList.value)).forEach((item) => {
+      if (item._id === id) {
+        item.view = false;
+      } else if (item.view) {
+        newViewList.push(item);
+      }
+      newSearchList.push(item);
+    });
+    searchList.value = newSearchList;
+    viewList.value = newViewList;
   } else {
     ElMessage({
       type: "warning",
@@ -192,12 +210,7 @@ const dialogCancel = () => {
   emptyForm();
 };
 // 提交表单
-let dialogSubmit = () => {
-  submitForm();
-};
-// 上传数据
-const submitForm = async () => {
-  console.log('执行函数');
+let dialogSubmit = async () => {
   let postData = {
     name: form.obj.name,
     birth: Number(form.obj.birth),
@@ -205,42 +218,40 @@ const submitForm = async () => {
     country: form.obj.country,
   };
   let data = "";
-  console.log('jixuzhixing',dialogType.value);
   if (dialogType.value === "create") {
     let res = await sanguoApi.addCharacter(postData);
-    if (res.data) {
+    if (res.code === "200") {
       data = res.data;
       searchList.value.push(data[0]);
-      closeForm();
-      ElMessage({
-        message: "添加成功",
-        type: "success",
-      });
+      dialogCancel();
+      ElMessage({ message: "添加成功", type: "success" });
     } else {
-      ElMessage({
-        message: "添加失败",
-        type: "error",
-      });
+      ElMessage({ message: "添加失败", type: "error" });
     }
   } else {
     postData._id = form.obj._id;
-    res = await sanguoApi.editCharacter(postData);
-    if (res.data) {
+    let res = await sanguoApi.editCharacter(postData);
+    if (res.code === "200") {
       let newList = searchList.value.map((item) => {
-        let obj = item._id === form.obj._id ? form.obj : item;
-        return obj;
+        if (item._id === form.obj._id) {
+          for (let prop in form.obj) {
+            item[prop] = form.obj[prop];
+          }
+        }
+        return item;
       });
       searchList.value = newList;
-      closeForm();
-      ElMessage({
-        message: "编辑成功",
-        type: "success",
+      viewList.value.forEach((item) => {
+        if (item._id === form.obj._id) {
+          for (let prop in form.obj) {
+            item[prop] = form.obj[prop];
+          }
+        }
       });
+      dialogCancel();
+      ElMessage({ message: "编辑成功", type: "success" });
     } else {
-      ElMessage({
-        message: "编辑失败",
-        type: "error",
-      });
+      ElMessage({ message: "编辑失败", type: "error" });
     }
   }
 };
@@ -250,41 +261,21 @@ const characterHandler = async () => {
   let res = await sanguoApi.character();
   if (res.data) {
     searchList.value = res.data || [];
-    console.log('searchList',searchList.value);
-  }
-};
-// 获取id数据
-const viewHandler = async () => {
-  let res = await sanguoApi.getView();
-  if (res.data) {
-    let viewList = res.data || [];
-    let arr = [];
-    viewList.forEach((item) => {
-      arr.push({ name: item.name });
+    let newRes = [];
+    JSON.parse(JSON.stringify(searchList.value)).forEach((item) => {
+      if (item.view) {
+        newRes.push(item);
+      }
     });
-    console.log("到这里了",arr);
-    viewCharacterHandler(arr);
+    viewList.value = newRes;
   }
 };
-// 通过id获取角色数据
-const viewCharacterHandler = async (arr) => {
-  let params = {list:arr};
-  console.log("发起请求",params);
-  let res = await sanguoApi.getCharacter(params);
-  console.log('结果',res);
-  if (res.data) {
-    if (res.data instanceof Array) {
-      viewList.value = res.data;
-    } else {
-      viewList.value = [];
-    }
-  }
-};
+
 // 清空视图内的角色
 const clearAll = async () => {
-  let res = await sanguoApi.deleteAllView();
+  let res = await sanguoApi.clearViewCharacter();
   if (res.data) {
-    viewHandler();
+    characterHandler();
   }
 };
 // 搜索事件
@@ -336,12 +327,10 @@ const mouseDownTargetPosition = ref({});
 
 // 找到需要拖拽的dom
 const findTarget = (el) => {
-  console.log('findtarget');
   if (el.className !== "search-card") {
     let newDom = el.parentElement.cloneNode(true);
     newDom.style.position = "absolute";
     el.parentElement.parentElement.insertBefore(newDom, el.parentElement);
-    // el.parentElement.parentElement.appendChild(newDom)
     return findTarget(newDom);
   } else {
     return el;
@@ -349,14 +338,8 @@ const findTarget = (el) => {
 };
 // 是否在view框中
 const insideViewOrNot = (x, y) => {
-  console.log('sanguoView',sanguoView.value);
   if (sanguoView.value) {
     let viewRect = sanguoView.value.getBoundingClientRect();
-    console.log('位置',
-    x > viewRect.x,
-    x < viewRect.x + viewRect.width,
-    y > viewRect.y,
-    y < viewRect.y + viewRect.height);
     if (
       x > viewRect.x &&
       x < viewRect.x + viewRect.width &&
@@ -386,31 +369,23 @@ const dragHandler = (e) => {
 };
 // 结束拖拽事件
 const dragEnd = (e) => {
-  console.log("dragHandler", e.pageX, e.pageY);
   document.removeEventListener("mousemove", dragHandler);
   document.removeEventListener("mouseup", dragEnd);
   document.body.onselectstart = () => {
     return true;
   };
-  console.log("dragEnd", dragTarget.value);
   // 判断是否拖拽到了view框中
   let inside = insideViewOrNot(e.pageX, e.pageY);
   if (inside) {
-    console.log('放入');
-    putCharacter(dragTarget.id);
-  } else {
-    console.log('不放入');
-    // emit('outCharacter')
+    putCharacter(dragTarget.value.id);
   }
-  dragTarget.value.remove()
+  dragTarget.value.remove();
   dragTarget.value = null;
 };
 
 // 开始拖拽事件
 const dragStart = (e) => {
-  console.log("dragStart", e);
   mouseDownTargetPosition.value = { x: e.offsetX, y: e.offsetY };
-  console.log('123123123');
   dragTarget.value = findTarget(e.target);
   document.addEventListener("mousemove", dragHandler);
   document.addEventListener("mouseup", dragEnd);
@@ -422,14 +397,12 @@ const dragStart = (e) => {
 // 执行函数
 initYear();
 characterHandler();
-viewHandler();
 
 // 渲染完成
 onMounted(() => {
   // 进入页面获取角色列表
-  console.log('sanguoView',sanguoView.value);
+  console.log("sanguoView", sanguoView.value);
 });
-// db.sanguocharacter.find({_id:ObjectId("6500745b42a5d3b1e89331cc")})
 </script>
 <template>
   <div id="sanguo">
@@ -487,7 +460,7 @@ onMounted(() => {
               :selectedYear="selectedYear"
               :data="item"
               :key="item._id"
-              @outCharacter="outCharacter(item)"
+              @outCharacter="outCharacter(item._id)"
             />
           </div>
           <div class="sort-container">
@@ -515,7 +488,7 @@ onMounted(() => {
               :data="item"
               :key="item._id"
               @dragStart="dragStart"
-              @putCharacter="putCharacter(item)"
+              @putCharacter="putCharacter(item._id)"
               @editCharacter="editCharacter(item)"
               @deleteCharacter="deleteCharacter(item)"
             />

@@ -33,91 +33,10 @@ const deleteCharacter = () => {
   emit("deleteCharacter");
 };
 
-// view框
-// const viewZone = document.getElementById("sanguo-view");
-console.log("data:", data._id);
-
-// const dragTarget = ref(null);
-// const mouseDownTargetPosition = ref({});
-
-// 找到需要拖拽的dom
-// const findTarget = (el) => {
-//   if (el.className !== "search-card") {
-//     let newDom = el.parentElement.cloneNode(true);
-//     newDom.style.position = "absolute";
-//     el.parentElement.parentElement.insertBefore(newDom, el.parentElement);
-//     // el.parentElement.parentElement.appendChild(newDom)
-//     return findTarget(newDom);
-//   } else {
-//     return el;
-//   }
-// };
-// 是否在view框中
-// const insideViewOrNot = (x, y) => {
-//   console.log('???');
-//   if (viewZone) {
-//     let viewRect = viewZone.getBoundingClientRect();
-//     if (
-//       x > viewRect.x &&
-//       x < viewRect.x + viewRect.width &&
-//       y > viewRect.y &&
-//       y < viewRect.y + viewRect.height
-//     ) {
-//       // 在view框中
-//       return true;
-//     } else {
-//       // 不在view框中
-//       return false;
-//     }
-//   }
-// };
-// // 拖拽中
-// const dragHandler = (e) => {
-//   dragTarget.value.style.left =
-//     e.pageX - mouseDownTargetPosition.value.x + "px";
-//   dragTarget.value.style.top =
-//     e.pageY - mouseDownTargetPosition.value.y - 55 + "px";
-//   let inside = insideViewOrNot(e.pageX, e.pageY);
-//   if (inside) {
-//     viewZone.style.boxShadow = "0 0 10px gray";
-//   } else {
-//     viewZone.style.boxShadow = "none";
-//   }
-// };
-// // 结束拖拽事件
-// const dragEnd = (e) => {
-//   console.log("dragHandler", e.pageX, e.pageY);
-//   document.removeEventListener("mousemove", dragHandler);
-//   document.removeEventListener("mouseup", dragEnd);
-//   document.body.onselectstart = () => {
-//     return true;
-//   };
-//   console.log("dragEnd", dragTarget.value);
-//   // 判断是否拖拽到了view框中
-//   let inside = insideViewOrNot(e.pageX, e.pageY);
-//   if (inside) {
-//     console.log("放入");
-//     emit("putCharacter");
-//   } else {
-//     console.log("不放入");
-//     // emit('outCharacter')
-//   }
-//   dragTarget.value.remove();
-//   dragTarget.value = null;
-// };
 
 // 开始拖拽事件
 const dragStart = (e) => {
-  console.log("dragStart");
   emit("dragStart",e);
-  // console.log("dragStart", e);
-  // mouseDownTargetPosition.value = { x: e.offsetX, y: e.offsetY };
-  // dragTarget.value = findTarget(e.target);
-  // document.addEventListener("mousemove", dragHandler);
-  // document.addEventListener("mouseup", dragEnd);
-  // document.body.onselectstart = () => {
-  //   return false;
-  // };
 };
 </script>
 <template>
