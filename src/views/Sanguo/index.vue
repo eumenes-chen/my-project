@@ -328,12 +328,12 @@ const mouseDownTargetPosition = ref({});
 // 找到需要拖拽的dom
 const findTarget = (el) => {
   if (el.className !== "search-card") {
-    let newDom = el.parentElement.cloneNode(true);
-    newDom.style.position = "absolute";
-    el.parentElement.parentElement.insertBefore(newDom, el.parentElement);
-    return findTarget(newDom);
+    return findTarget(el.parentElement);
   } else {
-    return el;
+    let newDom = el.cloneNode(true);
+    newDom.style.position = "absolute";
+    el.parentElement.insertBefore(newDom, el);
+    return newDom;
   }
 };
 // 是否在view框中
@@ -362,15 +362,16 @@ const dragHandler = (e) => {
     e.pageY - mouseDownTargetPosition.value.y - 55 + "px";
   let inside = insideViewOrNot(e.pageX, e.pageY);
   if (inside) {
-    sanguoView.style.boxShadow = "0 0 10px gray";
+    sanguoView.value.style.boxShadow = "0 0 10px gray";
   } else {
-    sanguoView.style.boxShadow = "none";
+    sanguoView.value.style.boxShadow = "none";
   }
 };
 // 结束拖拽事件
 const dragEnd = (e) => {
   document.removeEventListener("mousemove", dragHandler);
   document.removeEventListener("mouseup", dragEnd);
+  sanguoView.value.style.boxShadow = "none";
   document.body.onselectstart = () => {
     return true;
   };
@@ -400,8 +401,6 @@ characterHandler();
 
 // 渲染完成
 onMounted(() => {
-  // 进入页面获取角色列表
-  console.log("sanguoView", sanguoView.value);
 });
 </script>
 <template>

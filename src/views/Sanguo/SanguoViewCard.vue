@@ -50,7 +50,6 @@ watchEffect(() => {
     height: 50px;
     margin: 2px 0;
     line-height: 40px;
-
     .content {
         position: relative;
         margin: 5px 5px;
