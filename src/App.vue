@@ -41,7 +41,6 @@ onMounted(() => {
     .scroll-container {
       height: 100%;
       max-height: calc(100vh - 50px);
-      position: relative;
       width: 100%;    
       // overflow-x: clip;
       // overflow-y: auto;

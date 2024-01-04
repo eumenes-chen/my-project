@@ -74,8 +74,9 @@ const dragStart = (e) => {
   font-size: 14px;
   line-height: 24px;
   display: flex;
-  margin: 5px 0;
-  width: 290px;
+  margin-bottom: 5px;
+  // margin: 5px 0;
+  width: 280px;
   box-sizing: border-box;
   justify-content: space-around;
   cursor: move;

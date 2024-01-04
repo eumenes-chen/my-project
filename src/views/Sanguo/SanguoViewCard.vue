@@ -51,6 +51,7 @@ watchEffect(() => {
     margin: 2px 0;
     line-height: 40px;
     .content {
+        overflow: hidden;
         position: relative;
         margin: 5px 5px;
         padding: 0 5px 0 5px;

@@ -259,8 +259,8 @@ let dialogSubmit = async () => {
 // 获取角色数据
 const characterHandler = async () => {
   let res = await sanguoApi.character();
-  if (res.data) {
-    searchList.value = res.data || [];
+  if (res.data.list) {
+    searchList.value = res.data.list || [];
     let newRes = [];
     JSON.parse(JSON.stringify(searchList.value)).forEach((item) => {
       if (item.view) {
@@ -287,7 +287,7 @@ const searchHandler = async () => {
       str: searchValue.value,
     };
     let res = await sanguoApi.searchCharacter(params);
-    if (res.data && res.data.length > 0) {
+    if (res.code === "200") {
       searchList.value = res.data;
     } else {
       characterHandler();
@@ -358,8 +358,7 @@ const insideViewOrNot = (x, y) => {
 const dragHandler = (e) => {
   dragTarget.value.style.left =
     e.pageX - mouseDownTargetPosition.value.x + "px";
-  dragTarget.value.style.top =
-    e.pageY - mouseDownTargetPosition.value.y - 55 + "px";
+  dragTarget.value.style.top = e.pageY - mouseDownTargetPosition.value.y + "px";
   let inside = insideViewOrNot(e.pageX, e.pageY);
   if (inside) {
     sanguoView.value.style.boxShadow = "0 0 10px gray";
@@ -386,8 +385,15 @@ const dragEnd = (e) => {
 
 // 开始拖拽事件
 const dragStart = (e) => {
-  mouseDownTargetPosition.value = { x: e.offsetX, y: e.offsetY };
   dragTarget.value = findTarget(e.target);
+  console.log("e:", e);
+  console.log("eee", dragTarget.value.getBoundingClientRect());
+  mouseDownTargetPosition.value = {
+    x: e.pageX - dragTarget.value.getBoundingClientRect().left,
+    y: e.pageY - dragTarget.value.getBoundingClientRect().top,
+  };
+  console.log("得到", mouseDownTargetPosition.value);
+
   document.addEventListener("mousemove", dragHandler);
   document.addEventListener("mouseup", dragEnd);
   document.body.onselectstart = () => {
@@ -395,13 +401,26 @@ const dragStart = (e) => {
   };
 };
 
+const listenHandler = (e, type) => {
+  console.log("eType", e, type);
+  if (type) {
+    document.addEventListener("keypress", keyPressHandler);
+  }else{
+    document.removeEventListener('keypress',keyPressHandler)
+  }
+};
+const keyPressHandler = e => {
+  if(e.keyCode === 13){
+    searchHandler()
+  }
+}
+
 // 执行函数
 initYear();
 characterHandler();
 
 // 渲染完成
-onMounted(() => {
-});
+onMounted(() => {});
 </script>
 <template>
   <div id="sanguo">
@@ -432,6 +451,8 @@ onMounted(() => {
       </div>
       <div class="search">
         <el-input
+          @focus="listenHandler($event, true)"
+          @blur="listenHandler($event, false)"
           v-model="searchValue"
           placeholder="请输入角色姓名"
           :prefix-icon="Search"
@@ -529,7 +550,6 @@ onMounted(() => {
 @import "@/style/index.scss";
 
 #sanguo {
-  position: relative;
   height: calc(100vh - 50px);
   // overflow: hidden;
 
@@ -642,9 +662,11 @@ onMounted(() => {
       .search-zone {
         width: 30%;
         height: 100%;
+        box-sizing: border-box;
         padding: 10px;
         float: left;
-
+        overflow-y: auto;
+        overflow-x: clip;
         .search-container {
           height: 100%;
           overflow: visible;
