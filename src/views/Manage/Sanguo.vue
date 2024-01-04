@@ -125,11 +125,6 @@ onMounted(() => {});
 <template>
   <div id="Manage1">
     <div class="head-zone">
-      <div class="add-zone">
-        <el-button type="primary" @click="eventHandler('add')"
-          >新增数据</el-button
-        >
-      </div>
       <div class="search-zone">
         <el-input :value="searchValue" placeholder="请输入搜索信息"></el-input>
         <el-button type="primary">搜索</el-button>

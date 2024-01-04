@@ -55,7 +55,7 @@ watchEffect(() => {
         position: relative;
         margin: 5px 5px;
         padding: 0 5px 0 5px;
-        background-color: rgb(202, 202, 202);
+        background-color: rgb(255, 232, 232);
         border-radius: 8px;
         height: 40px;
         font-size: 12px;

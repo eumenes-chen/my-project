@@ -29,7 +29,25 @@ const router = createRouter({
     {
       path: '/calendar',
       name: 'calendar',
-      component: () => import('../views/Calendar/index.vue')
+      redirect:'/calendar/table',
+      component: () => import('../views/Calendar/index.vue'),
+      children:[
+        {
+          path: 'table',
+          name: 'table',
+          component: () => import('../views/Calendar/table.vue'),
+        },
+        {
+          path: 'timeline',
+          name: 'timeline',
+          component: () => import('../views/Calendar/timeline.vue'),
+        },
+        {
+          path: 'chart',
+          name: 'chart',
+          component: () => import('../views/Calendar/chart.vue'),
+        },
+      ]
     },
     {
       path: '/iframe',

@@ -592,10 +592,12 @@ onMounted(() => {});
 
     .left-main {
       box-sizing: border-box;
+      padding: 8px 0;
       border-radius: 8px;
       border: 1px solid #ddd;
       width: 20%;
       height: 100%;
+      background: white;
 
       .year-zone {
         width: 90%;
@@ -632,6 +634,7 @@ onMounted(() => {});
         .view-container {
           border: 1px solid gray;
           border-radius: 10px;
+          background: white;
           box-shadow: 2px 2px 5px rgba($color: gray, $alpha: 0.5);
           height: 100%;
           display: flex;
@@ -660,16 +663,20 @@ onMounted(() => {});
       }
 
       .search-zone {
+        background: white;
+        border-radius: 8px;
         width: 30%;
         height: 100%;
         box-sizing: border-box;
         padding: 10px;
         float: left;
-        overflow-y: auto;
-        overflow-x: clip;
+      
+        overflow: hidden;
+
         .search-container {
           height: 100%;
-          overflow: visible;
+        overflow-y: auto;
+        overflow-x: clip;  
           padding: 5px;
         }
       }

@@ -544,9 +544,13 @@ onMounted(() => {
 @import "@/style/index.scss";
 #weight {
   width: 100%;
-  height: calc(100vh - 50px);
-  background-color: rgb(255, 251, 243);
+  height: calc(100vh - 90px);
   overflow: hidden;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  margin-top: 20px;
 
   .info {
     height: 60px;
@@ -562,8 +566,10 @@ onMounted(() => {
   }
 
   #echart-dom {
+    flex: 1;
     width: 90%;
     margin: 0 5%;
+    padding-bottom: 20px;
     height: calc(100% - 60px);
     background-color: white;
   }

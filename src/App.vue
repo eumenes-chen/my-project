@@ -32,6 +32,10 @@ onMounted(() => {
 #app-view {
   margin: 0;
   padding: 0;
+  background-color: #F2F7FF;
+  background-image: url("@/assets/image/home-background.png");
+  background-size: contain;
+  background-repeat: no-repeat;
   .view-container {
     width: $container-width;
     margin: 0 auto;

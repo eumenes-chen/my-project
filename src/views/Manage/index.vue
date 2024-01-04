@@ -31,13 +31,13 @@ watchEffect(() => {
   menuList.some((item) => {
     if (item.subMenu && item.subMenu.length > 0) {
       return item.subMenu.some((itm) => {
-        if(itm.label === activeIndex.value){
+        if (itm.label === activeIndex.value) {
           target = itm;
           return true;
         }
       });
     } else {
-      if(item.label === activeIndex.value){
+      if (item.label === activeIndex.value) {
         target = item;
         return true;
       }
@@ -115,7 +115,7 @@ onMounted(() => {
       width: 100%;
       height: 100%;
       border-radius: 8px;
-      background: rgb(255, 249, 249);
+      background: rgba(255, 255, 255, 0.6);
       box-sizing: border-box;
       padding: 10px;
       overflow: hidden;
@@ -135,12 +135,12 @@ onMounted(() => {
           border-radius: 10px;
           margin-bottom: 5px;
           &:hover {
-            background: white;
+            background: rgba(255, 255, 255, 0.8);
           }
           &.is-active {
             color: black;
             font-weight: bold;
-            background: white;
+            background: rgba(255, 255, 255, 0.8);
           }
         }
       }

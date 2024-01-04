@@ -34,7 +34,8 @@ const init = () => {
 };
 const chooseNav = (e) => {
   let routerName = e.target.getAttribute("routerName");
-  $router.push({ path: routerName });
+  console.log('routerName',routerName);
+  $router.push({ name: routerName });
 };
 // 更新nav选中状态
 const updateNavList = () => {
@@ -49,15 +50,12 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@import "@/style/index.scss";
 #nav {
   width: 100%;
   height: 50px;
   position: fixed;
-  background: linear-gradient(
-    to bottom,
-    rgb(156, 252, 255),
-    rgb(214, 254, 255)
-  );
+
   z-index: 100;
   top: 0;
   /* background-color: orange; */
@@ -82,7 +80,7 @@ onMounted(() => {
       }
       &.is-active {
         font-weight: bold;
-        border-bottom: 3px solid aqua;
+        border-bottom: 3px solid $background-color-aqua-dark;
       }
     }
   }

@@ -69,14 +69,14 @@ const dragStart = (e) => {
 <style scoped lang="scss">
 .search-card {
   border-radius: 4px;
-  background-color: rgb(202, 202, 202);
+        background-color: rgb(255, 232, 232);
   padding: 6px 5px 6px 15px;
   font-size: 14px;
   line-height: 24px;
   display: flex;
   margin-bottom: 5px;
   // margin: 5px 0;
-  width: 280px;
+  width: 270px;
   box-sizing: border-box;
   justify-content: space-around;
   cursor: move;
@@ -94,7 +94,7 @@ const dragStart = (e) => {
   .el-button {
     margin-left: 2px;
     margin-right: 2px;
-    padding: 5px 6px;
+    padding: 5px;
   }
 }
 </style>
