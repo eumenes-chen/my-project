@@ -16,7 +16,7 @@ class sanguoApi {
     return $http({
       url: `${http}/character`,
       method: "get",
-      data: data,
+      params: data,
     });
   }
   // 获取指定角色
@@ -89,7 +89,7 @@ class sanguoApi {
     return $http({
       url: `${http}/view`,
       method: "get",
-      data: data,
+      params: data,
     });
   }
   // 添加name
@@ -120,7 +120,7 @@ class sanguoApi {
     return $http({
       url: `http://localhost:9091/api/message`,
       method: "get",
-      data: data,
+      params: data,
     });
   }
 }

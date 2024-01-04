@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, watchEffect, reactive, ref, nextTick } from "vue";
+import { ElMessage } from "element-plus";
 // // 引入请求
 import sanguoApi from "../../apis/sanguo";
 
@@ -7,8 +8,10 @@ import sanguoApi from "../../apis/sanguo";
 let tableData = reactive({
   tableList: [],
 });
+// 当前页数
+let curPage = ref(1);
 // 数据总量
-let total = ref(1000);
+let total = ref(0);
 // 每页数量
 let pageSize = ref(10);
 // 列表数据配置项
@@ -46,14 +49,19 @@ const eventHandler = (type, index, row) => {
     country: row.country,
   };
   if (type === "add") {
-    sanguoApi.addCharacter(row).then((res) => {
-      console.log("res:", res);
-      if (res.code === "200") {
-        console.log("新增成功");
-        row.created = true;
-        tableData.tableList.push(addEmptyRow());
-      }
-    });
+    if (!row.name && !row.birth && !row.death) {
+      ElMessage({ message: "不能添加空数据", type: "warning" });
+    } else {
+      sanguoApi.addCharacter(row).then((res) => {
+        console.log("res:", res);
+        if (res.code === "200") {
+          console.log("新增成功");
+          row._id = res.data[0]._id;
+          row.created = true;
+          tableData.tableList.push(addEmptyRow());
+        }
+      });
+    }
   } else if (type === "save") {
     if (row._id) {
       sanguoApi.editCharacter(row).then((res) => {
@@ -63,8 +71,8 @@ const eventHandler = (type, index, row) => {
   } else if (type === "delete") {
     sanguoApi.deleteCharacter(row).then((res) => {
       console.log("res:", res);
-      if(res.code === "200"){
-        tableData.tableList.splice(index,1)
+      if (res.code === "200") {
+        tableData.tableList.splice(index, 1);
       }
     });
     console.log("删除", index, row);
@@ -73,13 +81,21 @@ const eventHandler = (type, index, row) => {
 
 // 初始化
 const init = () => {
-  sanguoApi.character().then((res) => {
+  getCharacterList();
+};
+// 请求角色列表数据
+const getCharacterList = () => {
+  let params = {
+    curPage: curPage.value,
+    pageSize: pageSize.value,
+  };
+  sanguoApi.character(params).then((res) => {
     console.log("rse", res);
     if (res.code === "200") {
-      tableData.tableList = res.data.map((item) => {
+      tableData.tableList = res.data.list.map((item) => {
         return { ...item, created: true };
       });
-
+      total.value = res.data.total;
       tableData.tableList.push(addEmptyRow());
       console.log("tableData", tableData);
     }
@@ -93,6 +109,12 @@ const addEmptyRow = () => {
   });
   console.log("row:", row);
   return row;
+};
+// 改变页数
+const changePage = (page) => {
+  console.log("page", page);
+  curPage.value = page;
+  getCharacterList();
 };
 
 init();
@@ -185,6 +207,8 @@ onMounted(() => {});
           layout="prev, pager, next"
           :total="total"
           :page-size="pageSize"
+          :current-page="curPage"
+          @current-change="changePage"
         />
       </div>
     </div>
@@ -230,6 +254,7 @@ onMounted(() => {});
     flex: 1;
     box-sizing: border-box;
     padding: 10px 5px;
+    overflow: auto;
     .el-table {
       padding: 15px;
       border-radius: 8px;
