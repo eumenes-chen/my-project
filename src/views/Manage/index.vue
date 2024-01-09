@@ -3,10 +3,12 @@ import { onMounted, reactive, ref, watchEffect, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 // import { ElMenu, ElMenuItem, ElSubMenu } from "element-plus";
 import Sanguo from "./Sanguo.vue";
+import Date from "./Date.vue";
 import Manage3 from "./Manage3.vue";
 console.log("组件", Sanguo, Manage3);
 const componets = {
   Sanguo: Sanguo,
+  Date: Date,
   Manage3: Manage3,
 };
 
@@ -15,10 +17,10 @@ const $router = useRouter();
 const menuList = reactive([
   { title: "三国角色", label: "sanguo", component: "Sanguo" },
   {
-    title: "管理系统2",
-    label: "manage2",
+    title: "日历",
+    label: "calendar",
     subMenu: [
-      { title: "子导航1", label: "child1", component: "Manage3" },
+      { title: "日期数据", label: "date", component: "Date" },
       { title: "子导航2", label: "child2", component: "Manage3" },
     ],
   },
