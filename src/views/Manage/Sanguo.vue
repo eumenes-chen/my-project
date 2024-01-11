@@ -87,7 +87,7 @@ const getCharacterList = () => {
     curPage: curPage.value,
     pageSize: pageSize.value,
   };
-  sanguoApi.character(params).then((res) => {
+  sanguoApi.searchCharacter(params).then((res) => {
     console.log("rse", res);
     if (res.code === "200") {
       tableData.tableList = res.data.list.map((item) => {
@@ -113,7 +113,7 @@ const searchHandler = () => {
     getCharacterList();
   } else {
     let params = {
-      str: searchValue.value,
+      value: searchValue.value,
     };
     console.log("搜索", params);
     sanguoApi.searchCharacter(params).then((res) => {

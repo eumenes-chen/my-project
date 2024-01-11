@@ -1,12 +1,17 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
 import dayjs from "dayjs";
+import TableLayout from "element-plus/es/components/table/src/table-layout";
 
 // 接收props
 let props = defineProps({
   calendarData: {
     type: Object,
     default: {},
+  },
+  dateList: {
+    type: Object,
+    default: [],
   },
 });
 const weekConfig = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
@@ -25,28 +30,57 @@ const monthConfig = [
   { title: "十二月", totalDays: 31 },
 ];
 // 当前日期数据
-let currentDateInfo = reactive({
-  year: "",
-  month: "",
-  date: "",
-  day: "",
+let selectedDate = reactive({
+  currentDate: {
+    year: "",
+    month: "",
+    date: "",
+    day: "",
+  },
+  currentMonth: {
+    year: "",
+    month: "",
+  },
 });
+
 // 监听当前日期的变化
 watch(props.calendarData, (newVal) => {
-  currentDateInfo = {
+  console.log("calendarData变化");
+  selectedDate.currentDate = {
     year: newVal.currentInfo.dayjs.year() || "",
     month: newVal.currentInfo.dayjs.month() || "",
     date: newVal.currentInfo.dayjs.date() || "",
     day: newVal.currentInfo.dayjs.day() || "",
   };
+  selectedDate.currentMonth = {
+    year: newVal.currentInfo.month.year() || "",
+    month: newVal.currentInfo.month.month() || "",
+  };
+  initTable(newVal.currentInfo.month);
 });
+// 监听日期列表
+watch(
+  () => props.dateList,
+  (newVal) => {
+    console.log("dateList变化", newVal);
+    tableData.list = tableData.list.map((item, index) => {
+      let target = newVal[index];
+      if (item.date === dayjs(target.date).date()) {
+        console.log('item',item.fromActiveMonth);
+        Object.assign(target, {fromActiveMonth:item.fromActiveMonth});
+        return target;
+      }
+    });
+    console.log("结果", tableData.list);
+  }
+);
 // 日期数据
 const tableData = reactive({
   list: [
     {
-      dayjs: "",
-      date: 8,
-      day: 1,
+      date: "",
+      dateStamp: "",
+      weight: "",
     },
   ],
 });
@@ -64,9 +98,13 @@ const getDayNumOfMonth = (date) => {
   return res;
 };
 
-// 表格日历初始化
-const initTable = () => {
-  let dateInfo = dayjs();
+/**
+ * 创建表格日历
+ * params { date:YYYY-MM-DD }(该月的某天)
+ */
+const initTable = (monthDate) => {
+  tableData.list = [];
+  let dateInfo = dayjs(monthDate);
   let lastMonth = dateInfo.add(-1, "month").startOf("month");
   let dayNumOfMonth = dateInfo.daysInMonth();
   let dayNumOfLastMonth = lastMonth.daysInMonth();
@@ -76,25 +114,26 @@ const initTable = () => {
   let fromActiveMonth = true;
   // 正向循环
   while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
-    newList.push({dateInfo,date,day,fromActiveMonth,});
+    newList.push({ dateInfo, date, day, fromActiveMonth });
     dateInfo = dateInfo.add(1, "day");
     date = dateInfo.date();
     day = dateInfo.day();
-    fromActiveMonth = date === dayNumOfMonth ? false : fromActiveMonth;
+    fromActiveMonth = date === 1 ? false : fromActiveMonth;
   }
   // 数据初始化
-  dateInfo = dayjs().subtract(1, "day");
+  dateInfo = dayjs(monthDate);
   date = dateInfo.date();
   day = dateInfo.day();
   fromActiveMonth = true;
   // 反向循环
-  while (fromActiveMonth || (!fromActiveMonth && day !== 6)) {
-    newList.unshift({ dateInfo, date, day, fromActiveMonth });
+  while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
     dateInfo = dateInfo.subtract(1, "day");
     date = dateInfo.date();
     day = dateInfo.day();
     fromActiveMonth = date === dayNumOfLastMonth ? false : fromActiveMonth;
+    newList.unshift({ dateInfo, date, day, fromActiveMonth });
   }
+  console.log("newList", newList);
   tableData.list = newList;
   let params = {
     start: newList[0].dateInfo.format("YYYY-MM-DD"),
@@ -107,14 +146,34 @@ const initTable = () => {
 /**
  * 改变选中月份
  */
-const changeMonth = (type) => {};
+const changeMonth = (type) => {
+  let month = "";
+  if (type === "prev") {
+    month = props.calendarData.currentInfo.month
+      .subtract(1, "month")
+      .format("YYYY-MM-DD");
+  } else if (type === "next") {
+    month = props.calendarData.currentInfo.month
+      .add(1, "month")
+      .format("YYYY-MM-DD");
+  }
+  props.calendarData.methods.changeMonth(month);
+};
+// 日期过滤器
+const dateFilter = computed(() => {
+  return function (value, type) {
+    console.log("value", value, type);
+    let res = "";
+    if (type === "date" && value.length) {
+      res = value.split("-")[2].replace(/^0/, "");
+    }
+    return res;
+  };
+});
 
 onMounted(() => {
-  // let today = new Date();
-  initTable();
-      console.log('1',dayjs());
-    console.log('2',dayjs().format('YYYY-MM-DD'));
-    console.log('3',dayjs(dayjs().format('YYYY-MM-DD')));
+  // let today = dayjs().format();
+  // initTable(today);
 });
 </script>
 <template>
@@ -131,10 +190,14 @@ onMounted(() => {
         <el-button type="default" class="arrow-btn" @click="changeMonth('next')"
           >后</el-button
         >
-        <span class="year-val">{{ currentDateInfo.year }}年</span>
-        <span class="month-val">{{ currentDateInfo.month + 1 }}月</span>
+        <span class="year-val">{{ selectedDate.currentMonth.year }}年</span>
+        <span class="month-val"
+          >{{ selectedDate.currentMonth.month + 1 }}月</span
+        >
       </div>
+      <!-- 表格区域 -->
       <div class="table-zone">
+        <!-- 表头 -->
         <div class="calendar-head">
           <div
             class="head-item"
@@ -144,14 +207,17 @@ onMounted(() => {
             {{ item }}
           </div>
         </div>
+        <!-- 日期 -->
         <div class="calendar-zone">
           <div
             class="calendar-item"
             v-for="(item, index) in tableData.list"
             :key="index + '_' + item.date + '_' + item.day"
+            :class="{ 'current-month': item.fromActiveMonth }"
           >
             <div class="date">
-              {{ item.date }}
+              {{ dateFilter(item.date, "date") }}
+              {{item.weight}}
             </div>
           </div>
         </div>
@@ -161,10 +227,10 @@ onMounted(() => {
     <div class="right-calendar">
       <div class="image-zone">
         <div class="info-zone">
-          <span class="month">{{ calendarData.currentInfo.month + 1 }}月</span>
-          <span class="date">{{ calendarData.currentInfo.date }}日</span>
+          <span class="month">{{ selectedDate.currentDate.month + 1 }}月</span>
+          <span class="date">{{ selectedDate.currentDate.date }}日</span>
           <span class="day">{{
-            weekConfig[calendarData.currentInfo.day]
+            weekConfig[selectedDate.currentDate.day]
           }}</span>
         </div>
       </div>
@@ -264,6 +330,13 @@ onMounted(() => {
           padding: 12px 10px;
           border: 1px solid rgb(172, 255, 255);
           box-sizing: border-box;
+          background-color: rgb(201, 201, 201);
+          color: $font-color-black;
+          opacity: 0.5;
+          &.current-month {
+            background-color: white;
+            opacity: 1;
+          }
           .date {
             color: $font-color-black;
           }

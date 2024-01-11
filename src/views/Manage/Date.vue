@@ -84,7 +84,7 @@ const searchHandler = () => {
     getDateList();
   } else {
     let params = {
-      str: searchValue.value,
+      value: searchValue.value,
     };
     console.log("搜索", params);
     calendarApi.searchDate(params).then((res) => {

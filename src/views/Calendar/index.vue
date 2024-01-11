@@ -45,14 +45,20 @@ const tabList = reactive({
 // 日期数据
 const calendarData = reactive({
   currentInfo: {
-    dayjs: "",
+    dayjs: "", // dayjs
+    month: "", // dayjs
   },
   methods: {
     getDateList: (params) => {
       return getDateList(params);
     },
+    changeMonth: (params) => {
+      return changeMonth(params);
+    },
   },
 });
+// 日期列表数据
+const dateList = ref(null)
 //
 /**
  * 发起请求日期列表
@@ -60,9 +66,18 @@ const calendarData = reactive({
  */
 const getDateList = (params) => {
   console.log("日期列表params", params);
-  calendarApi.getDate(params).then(res=> {
-    console.log('日期列表',res);
-  })
+  calendarApi.getDate(params).then((res) => {
+    console.log("日期列表", res.data.list);
+    dateList.value = res.data.list
+  });
+};
+/**
+ * 修改当前显示月份
+ * params { date:YYYY-MM-DD }
+ */
+const changeMonth = (params) => {
+  console.log('params',params);
+  calendarData.currentInfo.month = dayjs(params)
 };
 /**
  * 根据日期获取该日期内容
@@ -71,6 +86,7 @@ const getDateList = (params) => {
 const getCurrentDate = (dateInfo) => {
   calendarData.currentInfo = {
     dayjs: dateInfo,
+    month: dateInfo,
   };
 };
 
@@ -88,9 +104,10 @@ const initActiveName = () => {
     $router.push({ query: { active: activeName.value } });
   }
 };
+
 // 初始化日期数据
 const initDate = () => {
-  let today = dayjs();
+  let today = dayjs("2024-01-12");
   getCurrentDate(today);
 };
 
@@ -113,6 +130,7 @@ onMounted(() => {
           <component
             :is="item.component"
             :calendarData="calendarData"
+            :dateList="dateList"
           ></component>
           {{ index }}
         </el-tab-pane>
