@@ -1,60 +1,122 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, reactive, ref, watch, markRaw } from "vue";
+import { useRoute, useRouter } from "vue-router";
+// 引入组件
+import Table from "./table.vue";
+import Timeline from "./timeline.vue";
+import Chart from "./chart.vue";
+// 引入插件
+import dayjs from "dayjs";
+// // 引入请求
+import calendarApi from "../../apis/calendar";
 
+// dayjs().format()
 const $router = useRouter();
-const path = ref($router.currentRoute);
+const $route = useRoute();
+const activeName = ref(null); // 激活的tab
+const components = reactive({
+  table: markRaw(Table),
+  timeline: markRaw(Timeline),
+  chart: markRaw(Chart),
+});
 
 const tabList = reactive({
   list: [
-    { title: "表格", name: "table", active: false },
-    { title: "时间线", name: "timeline", active: false },
-    { title: "折线图", name: "chart", active: false },
+    {
+      title: "表格",
+      name: "table",
+      component: components.table,
+      active: false,
+    },
+    {
+      title: "时间线",
+      name: "timeline",
+      component: components.timeline,
+      active: false,
+    },
+    {
+      title: "折线图",
+      name: "chart",
+      component: components.chart,
+      active: false,
+    },
   ],
 });
-
-// 监听地址路由
-watch(path, (newVal) => {
-  let activeName = path.value.name;
-  pathHandler(activeName);
+// 日期数据
+const calendarData = reactive({
+  currentInfo: {
+    dayjs: "",
+  },
+  methods: {
+    getDateList: (params) => {
+      return getDateList(params);
+    },
+  },
 });
-// 监听路由地址
-const pathHandler = (tabName) => {
-  tabList.list.forEach(item => {
-    if(item.name === tabName){
-      item.active = true;
-    }else{
-      item.active = false;
-    }
+//
+/**
+ * 发起请求日期列表
+ * params {{ start:dayjs, end:dayjs }}
+ */
+const getDateList = (params) => {
+  console.log("日期列表params", params);
+  calendarApi.getDate(params).then(res=> {
+    console.log('日期列表',res);
   })
 };
-// 切换tab
-const changeTab = (tabName) => {
-  $router.push({ name: tabName });
+/**
+ * 根据日期获取该日期内容
+ * params { dayjs }
+ */
+const getCurrentDate = (dateInfo) => {
+  calendarData.currentInfo = {
+    dayjs: dateInfo,
+  };
+};
+
+// 点击tab
+const tabsHandler = (e) => {
+  let paneName = e.paneName;
+  $router.push({ query: { active: paneName } });
+};
+// 默认选中tab
+const initActiveName = () => {
+  if ($route.query.active) {
+    activeName.value = $route.query.active;
+  } else {
+    activeName.value = tabList.list[0].name;
+    $router.push({ query: { active: activeName.value } });
+  }
+};
+// 初始化日期数据
+const initDate = () => {
+  let today = dayjs();
+  getCurrentDate(today);
 };
 
 onMounted(() => {
-  let activeName = path.value.name;
-  pathHandler(activeName);
+  initActiveName();
+  initDate();
 });
 </script>
 
 <template>
   <div id="calendar">
-    <div class="head">
-      <ul>
-        <li
+    <div class="main">
+      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="tabsHandler">
+        <el-tab-pane
           v-for="(item, index) in tabList.list"
           :key="index"
-          @click="changeTab(item.name)"
-          :class="{'active':item.active}"
+          :label="item.title"
+          :name="item.name"
         >
-          {{ item.title }}
-        </li>
-      </ul>
-    </div>
-    <div class="main">
-      <router-view></router-view>
+          <component
+            :is="item.component"
+            :calendarData="calendarData"
+          ></component>
+          {{ index }}
+        </el-tab-pane>
+      </el-tabs>
     </div>
   </div>
 </template>
@@ -63,46 +125,49 @@ onMounted(() => {
 @import "@/style/index.scss";
 #calendar {
   height: calc(100vh - 50px);
-  display: flex;
-  flex-direction: column;
-  .head {
-    height: 50px;
-    width: 100%;
+  // display: flex;
+  .main {
+    height: 100%;
     margin: 10px 0;
-    border-radius: 8px;
-    background: $background-color-opacity;
-    ul {
-      margin: 0;
-      padding: 0 0 0 50px;
+    :deep(.el-tabs) {
+      height: 100%;
       display: flex;
-      list-style-type: none;
-      li {
-        color: rgb(122, 122, 122);
+      flex-direction: column;
+      .el-tabs__header {
+        background: $background-color-opacity;
         height: 50px;
-        line-height: 50px;
-        margin-right: 10px;
-        padding: 0 20px;
-        letter-spacing: 1px;
-        cursor: pointer;
-        box-sizing: border-box;
-        &:hover {
-          border-bottom: 4px solid $background-color-aqua-dark;
-          color: $background-color-aqua-dark;
+        width: 100%;
+        margin: 10px 0;
+        border-radius: 8px;
+        .el-tabs__nav-wrap {
+          .el-tabs__nav-scroll {
+            .el-tabs__nav {
+              height: 50px;
+              margin: 0 50px;
+              .el-tabs__item {
+                letter-spacing: 2px;
+                height: 50px;
+                line-height: 50px;
+              }
+            }
+          }
         }
-        &.active {
-          font-weight: 600;
-          border-bottom: 4px solid $background-color-aqua-dark;
-          color: $background-color-aqua-dark;
+      }
+      .el-tabs__content {
+        width: 100%;
+        flex: 1;
+        min-height: 600px;
+        max-height: 900px;
+        // background: $background-color-opacity;
+        padding-bottom: 10px;
+        .el-tab-pane {
+          height: 100%;
         }
       }
     }
   }
-  .main {
-    width: 100%;
-    flex: 1;
-    min-height: 600px;
-    max-height: 900px;
-    padding-bottom: 10px;
-  }
+  // .main {
+
+  // }
 }
 </style>

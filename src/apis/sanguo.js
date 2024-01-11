@@ -84,38 +84,7 @@ class sanguoApi {
     });
   }
 
-  // 获取name
-  getView(data) {
-    return $http({
-      url: `${http}/view`,
-      method: "get",
-      params: data,
-    });
-  }
-  // 添加name
-  addView(data) {
-    return $http({
-      url: `${http}/addview`,
-      method: "post",
-      data: data,
-    });
-  }
-  // 删除name
-  deleteView(data) {
-    return $http({
-      url: `${http}/deleteview`,
-      method: "post",
-      data: data,
-    });
-  }
-  // 删除全部name
-  deleteAllView(data) {
-    return $http({
-      url: `${http}/deleteallview`,
-      method: "post",
-      data: data,
-    });
-  } // 获取消息mock数据
+  // 获取消息mock数据
   getMessage(data) {
     return $http({
       url: `http://localhost:9091/api/message`,

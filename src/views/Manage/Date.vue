@@ -3,6 +3,7 @@ import { computed, onMounted, watchEffect, reactive, ref, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 // // 引入请求
 import sanguoApi from "../../apis/sanguo";
+import calendarApi from "../../apis/calendar";
 
 // 列表数据
 let tableData = reactive({
@@ -13,21 +14,14 @@ let curPage = ref(1);
 // 数据总量
 let total = ref(0);
 // 每页数量
-let pageSize = ref(10);
+let pageSize = ref(12);
 // 列表数据配置项
 let tableConfig = reactive({
   list: [
     { prop: "id" },
-    { prop: "name", label: "姓名", width: "200", fixed: true },
-    { prop: "birth", label: "出生年", width: "200" },
-    { prop: "death", label: "去世年", width: "200" },
-    {
-      prop: "country",
-      label: "阵营",
-      width: "200",
-      type: "select",
-      options: ["魏国", "蜀汉", "吴国", "其他"],
-    },
+    { prop: "date", label: "日期", width: "300", fixed: true },
+    { prop: "dateStamp", label: "时间戳", width: "300" },
+    { prop: "weight", label: "体重", width: "200" },
   ],
 });
 // 搜索信息
@@ -42,37 +36,24 @@ watchEffect(() => {});
 // 打开弹出框
 const eventHandler = (type, index, row) => {
   console.log("触发", type, index, row);
-  let params = {
-    name: row.name,
-    birth: Number(row.birth),
-    death: Number(row.death),
-    country: row.country,
-  };
-  if (type === "add") {
-    if (!row.name && !row.birth && !row.death) {
-      ElMessage({ message: "不能添加空数据", type: "warning" });
-    } else {
-      sanguoApi.addCharacter(row).then((res) => {
-        console.log("res:", res);
+  if (type === "save") {
+    if (row._id) {
+      calendarApi.editDate(row).then((res) => {
+        console.log("res1", res.code, res.code === "200");
         if (res.code === "200") {
-          console.log("新增成功");
-          row._id = res.data[0]._id;
-          row.created = true;
-          tableData.tableList.push(addEmptyRow());
+          // getDateList()
         }
       });
     }
-  } else if (type === "save") {
-    if (row._id) {
-      sanguoApi.editCharacter(row).then((res) => {
-        console.log("res1:", res);
-      });
-    }
   } else if (type === "delete") {
-    sanguoApi.deleteCharacter(row).then((res) => {
+    calendarApi.deleteDate(row).then((res) => {
       console.log("res:", res);
       if (res.code === "200") {
-        tableData.tableList.splice(index, 1);
+        ElMessage({
+          type: "success",
+          message: "删除成功",
+        });
+        getDateList();
       }
     });
     console.log("删除", index, row);
@@ -81,40 +62,58 @@ const eventHandler = (type, index, row) => {
 
 // 初始化
 const init = () => {
-  getCharacterList();
+  getDateList();
 };
 // 请求角色列表数据
-const getCharacterList = () => {
+const getDateList = () => {
   let params = {
     curPage: curPage.value,
     pageSize: pageSize.value,
   };
-  sanguoApi.character(params).then((res) => {
-    console.log("rse", res);
+  calendarApi.getDate(params).then((res) => {
+    console.log("res2", res.code, res.code === "200");
     if (res.code === "200") {
-      tableData.tableList = res.data.list.map((item) => {
-        return { ...item, created: true };
-      });
+      tableData.tableList = res.data.list;
       total.value = res.data.total;
-      tableData.tableList.push(addEmptyRow());
-      console.log("tableData", tableData);
     }
   });
 };
-// 添加新的空数据
-const addEmptyRow = () => {
-  let row = {};
-  tableConfig.list.forEach((item) => {
-    return (row[item.prop] = "");
-  });
-  console.log("row:", row);
-  return row;
+// 搜索事件
+const searchHandler = () => {
+  if (!searchValue.value) {
+    getDateList();
+  } else {
+    let params = {
+      str: searchValue.value,
+    };
+    console.log("搜索", params);
+    calendarApi.searchDate(params).then((res) => {
+      if (res.code === "200") {
+        tableData.tableList = res.data.list.map((item) => {
+          return { ...item, created: true };
+        });
+        total.value = res.data.total;
+      }
+    });
+  }
+};
+const listenHandler = (e, type) => {
+  if (type) {
+    document.addEventListener("keypress", keyPressHandler);
+  } else {
+    document.removeEventListener("keypress", keyPressHandler);
+  }
+};
+const keyPressHandler = (e) => {
+  if (e.keyCode === 13) {
+    searchHandler();
+  }
 };
 // 改变页数
 const changePage = (page) => {
   console.log("page", page);
   curPage.value = page;
-  getCharacterList();
+  getDateList();
 };
 
 init();
@@ -126,8 +125,13 @@ onMounted(() => {});
   <div id="Manage1">
     <div class="head-zone">
       <div class="search-zone">
-        <el-input :value="searchValue" placeholder="请输入搜索信息"></el-input>
-        <el-button type="primary">搜索</el-button>
+        <el-input
+          v-model="searchValue"
+          @focus="listenHandler($event, true)"
+          @blur="listenHandler($event, false)"
+          placeholder="请输入搜索信息"
+        ></el-input>
+        <el-button type="primary" @click="searchHandler">搜索</el-button>
       </div>
     </div>
     <div class="table-zone">
@@ -170,27 +174,16 @@ onMounted(() => {});
 
         <el-table-column fixed="right" label="操作" width="150">
           <template #default="scope">
-            <template v-if="scope.row.created">
-              <el-popconfirm
-                title="确定删除此项吗？"
-                confirm-button-text="确定"
-                cancel-button-text="取消"
-                @confirm="eventHandler('delete', scope.$index, scope.row)"
-              >
-                <template #reference>
-                  <el-button type="warning" round size="small">删除</el-button>
-                </template>
-              </el-popconfirm>
-            </template>
-            <template v-else>
-              <el-button
-                type="success"
-                round
-                size="small"
-                @click="eventHandler('add', scope.$index, scope.row)"
-                >新增</el-button
-              >
-            </template>
+            <el-popconfirm
+              title="确定删除此项吗？"
+              confirm-button-text="确定"
+              cancel-button-text="取消"
+              @confirm="eventHandler('delete', scope.$index, scope.row)"
+            >
+              <template #reference>
+                <el-button type="warning" round size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>

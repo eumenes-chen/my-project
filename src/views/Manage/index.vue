@@ -57,7 +57,9 @@ const handleSelect = (key, keyPath) => {
   $router.push({ query: { active: key } });
 };
 const init = () => {
-  activeIndex.value = activeIndex.value || menuList[0].label;
+  activeIndex.value =
+    activeIndex.value ||
+    (menuList[0].subMenu ? menuList[0].label : menuList[0].label);
 };
 // 渲染完成
 onMounted(() => {
@@ -74,6 +76,7 @@ onMounted(() => {
           @select="handleSelect"
         >
           <template v-for="item in menuList">
+            <!-- 有子项 -->
             <el-sub-menu
               v-if="item.subMenu && item.subMenu.length > 0"
               :key="item.label"
@@ -88,6 +91,7 @@ onMounted(() => {
                 {{ itm.title }}
               </el-menu-item>
             </el-sub-menu>
+            <!-- 无子项 -->
             <el-menu-item v-else :key="item.label" :index="item.label">
               {{ item.title }}
             </el-menu-item>
@@ -97,7 +101,6 @@ onMounted(() => {
     </div>
     <div class="manage-view">
       <div class="view-container">
-        <!-- <Manage1></Manage1> -->
         <component :is="currentComponent"></component>
       </div>
     </div>

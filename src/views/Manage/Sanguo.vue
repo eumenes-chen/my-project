@@ -13,7 +13,7 @@ let curPage = ref(1);
 // 数据总量
 let total = ref(0);
 // 每页数量
-let pageSize = ref(10);
+let pageSize = ref(12);
 // 列表数据配置项
 let tableConfig = reactive({
   list: [
@@ -32,10 +32,6 @@ let tableConfig = reactive({
 });
 // 搜索信息
 let searchValue = ref("");
-// 打开的弹出框的类型
-let dialogType = ref(false);
-// 弹出框的表单数据
-let form = reactive({ title: "标题" });
 
 watchEffect(() => {});
 
@@ -55,7 +51,6 @@ const eventHandler = (type, index, row) => {
       sanguoApi.addCharacter(row).then((res) => {
         console.log("res:", res);
         if (res.code === "200") {
-          console.log("新增成功");
           row._id = res.data[0]._id;
           row.created = true;
           tableData.tableList.push(addEmptyRow());
@@ -70,9 +65,12 @@ const eventHandler = (type, index, row) => {
     }
   } else if (type === "delete") {
     sanguoApi.deleteCharacter(row).then((res) => {
-      console.log("res:", res);
       if (res.code === "200") {
-        tableData.tableList.splice(index, 1);
+        ElMessage({
+          type: "success",
+          message: "删除成功",
+        });
+        getCharacterList();
       }
     });
     console.log("删除", index, row);
@@ -97,7 +95,6 @@ const getCharacterList = () => {
       });
       total.value = res.data.total;
       tableData.tableList.push(addEmptyRow());
-      console.log("tableData", tableData);
     }
   });
 };
@@ -110,6 +107,38 @@ const addEmptyRow = () => {
   console.log("row:", row);
   return row;
 };
+// 搜索事件
+const searchHandler = () => {
+  if (!searchValue.value) {
+    getCharacterList();
+  } else {
+    let params = {
+      str: searchValue.value,
+    };
+    console.log("搜索", params);
+    sanguoApi.searchCharacter(params).then((res) => {
+      if (res.code === "200") {
+        tableData.tableList = res.data.list.map((item) => {
+          return { ...item, created: true };
+        });
+        total.value = res.data.total;
+        tableData.tableList.push(addEmptyRow());
+      }
+    });
+  }
+};
+const listenHandler = (e, type) => {
+  if (type) {
+    document.addEventListener("keypress", keyPressHandler);
+  } else {
+    document.removeEventListener("keypress", keyPressHandler);
+  }
+};
+const keyPressHandler = (e) => {
+  if (e.keyCode === 13) {
+    searchHandler();
+  }
+};
 // 改变页数
 const changePage = (page) => {
   console.log("page", page);
@@ -117,17 +146,22 @@ const changePage = (page) => {
   getCharacterList();
 };
 
-init();
-
 // 渲染完成
-onMounted(() => {});
+onMounted(() => {
+  init();
+});
 </script>
 <template>
   <div id="Manage1">
     <div class="head-zone">
       <div class="search-zone">
-        <el-input :value="searchValue" placeholder="请输入搜索信息"></el-input>
-        <el-button type="primary">搜索</el-button>
+        <el-input
+          v-model="searchValue"
+          @focus="listenHandler($event, true)"
+          @blur="listenHandler($event, false)"
+          placeholder="请输入搜索信息"
+        ></el-input>
+        <el-button type="primary" @click="searchHandler">搜索</el-button>
       </div>
     </div>
     <div class="table-zone">

@@ -1,5 +1,14 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import dayjs from "dayjs";
+
+// 接收props
+let props = defineProps({
+  calendarData: {
+    type: Object,
+    default: {},
+  },
+});
 const weekConfig = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 const monthConfig = [
   { title: "一月", totalDays: 31 },
@@ -15,21 +24,31 @@ const monthConfig = [
   { title: "十一月", totalDays: 30 },
   { title: "十二月", totalDays: 31 },
 ];
-
+// 当前日期数据
+let currentDateInfo = reactive({
+  year: "",
+  month: "",
+  date: "",
+  day: "",
+});
+// 监听当前日期的变化
+watch(props.calendarData, (newVal) => {
+  currentDateInfo = {
+    year: newVal.currentInfo.dayjs.year() || "",
+    month: newVal.currentInfo.dayjs.month() || "",
+    date: newVal.currentInfo.dayjs.date() || "",
+    day: newVal.currentInfo.dayjs.day() || "",
+  };
+});
 // 日期数据
-const calendarData = reactive({
+const tableData = reactive({
   list: [
     {
+      dayjs: "",
       date: 8,
       day: 1,
     },
   ],
-  dateInfo:{
-    year:'',
-    month:'',
-    date:'',
-    day:'',
-  }
 });
 
 /**
@@ -47,71 +66,73 @@ const getDayNumOfMonth = (date) => {
 
 // 表格日历初始化
 const initTable = () => {
-  let today = new Date();
-  getDateInfo(today)
-  let lastMonth = new Date(new Date().setMonth(today.getMonth() - 1));
-  let dayNumOfMonth = getDayNumOfMonth(today);
-  let dayNumOfLastMonth = getDayNumOfMonth(lastMonth);
-  let date = today.getDate();
-  let day = today.getDay();
+  let dateInfo = dayjs();
+  let lastMonth = dateInfo.add(-1, "month").startOf("month");
+  let dayNumOfMonth = dateInfo.daysInMonth();
+  let dayNumOfLastMonth = lastMonth.daysInMonth();
+  let date = dateInfo.date();
+  let day = dateInfo.day();
   let newList = [];
+  let fromActiveMonth = true;
   // 正向循环
-  for (
-    var i = date, k = day;
-    i <= 31 || (i > dayNumOfMonth && k <= 6);
-    i++, k++
-  ) {
-    k = k > 6 ? 0 : k;
-    newList.push({
-      date: i > dayNumOfMonth ? i - dayNumOfMonth : i,
-      day: k,
-    });
+  while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
+    newList.push({dateInfo,date,day,fromActiveMonth,});
+    dateInfo = dateInfo.add(1, "day");
+    date = dateInfo.date();
+    day = dateInfo.day();
+    fromActiveMonth = date === dayNumOfMonth ? false : fromActiveMonth;
   }
-  for (let i = date - 1, k = day - 1; i > 0 || (i <= 0 && k >= 0); i--, k--) {
-    console.log("循环", i, k);
-    k = k < 0 ? 6 : k;
-    newList.unshift({
-      date: i < 1 ? dayNumOfLastMonth + i : i,
-      day: k,
-    });
+  // 数据初始化
+  dateInfo = dayjs().subtract(1, "day");
+  date = dateInfo.date();
+  day = dateInfo.day();
+  fromActiveMonth = true;
+  // 反向循环
+  while (fromActiveMonth || (!fromActiveMonth && day !== 6)) {
+    newList.unshift({ dateInfo, date, day, fromActiveMonth });
+    dateInfo = dateInfo.subtract(1, "day");
+    date = dateInfo.date();
+    day = dateInfo.day();
+    fromActiveMonth = date === dayNumOfLastMonth ? false : fromActiveMonth;
   }
-  calendarData.list = newList;
-  console.log("list", calendarData.list);
+  tableData.list = newList;
+  let params = {
+    start: newList[0].dateInfo.format("YYYY-MM-DD"),
+    end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
+  };
+  // 根据首位日期请求日期列表
+  props.calendarData.methods.getDateList(params);
 };
-/**
- * 根据日期获取该日期内容
- * params { date }
- */
-const getDateInfo = (dateInfo) => {
-  calendarData.dateInfo.year = dateInfo.getFullYear();
-  calendarData.dateInfo.month = dateInfo.getMonth();
-  calendarData.dateInfo.date = dateInfo.getDate();
-  calendarData.dateInfo.day = dateInfo.getDay();
-  console.log(calendarData);
-}
 
 /**
  * 改变选中月份
  */
-const changeMonth = (type) => {
-  
-}
+const changeMonth = (type) => {};
 
 onMounted(() => {
-  let today = new Date()
+  // let today = new Date();
   initTable();
+      console.log('1',dayjs());
+    console.log('2',dayjs().format('YYYY-MM-DD'));
+    console.log('3',dayjs(dayjs().format('YYYY-MM-DD')));
 });
 </script>
 <template>
   <div id="calendar-table">
+    <!-- 左侧部分 -->
     <div class="left-calendar"></div>
+    <!-- 中部日历部分 -->
     <div class="center-calendar">
       <div class="table-info">
         <el-button type="primary" class="today-btn">今日</el-button>
-        <el-button type="default" class="arrow-btn" @click="changeMonth('prev')">前</el-button>
-        <el-button type="default" class="arrow-btn" @click="changeMonth('next')">后</el-button>
-        <span class="year-val">{{calendarData.dateInfo.year}}年</span>
-        <span class="month-val">{{calendarData.dateInfo.month + 1}}月</span>
+        <el-button type="default" class="arrow-btn" @click="changeMonth('prev')"
+          >前</el-button
+        >
+        <el-button type="default" class="arrow-btn" @click="changeMonth('next')"
+          >后</el-button
+        >
+        <span class="year-val">{{ currentDateInfo.year }}年</span>
+        <span class="month-val">{{ currentDateInfo.month + 1 }}月</span>
       </div>
       <div class="table-zone">
         <div class="calendar-head">
@@ -126,15 +147,46 @@ onMounted(() => {
         <div class="calendar-zone">
           <div
             class="calendar-item"
-            v-for="(item, index) in calendarData.list"
+            v-for="(item, index) in tableData.list"
             :key="index + '_' + item.date + '_' + item.day"
           >
-            {{item.date}}
+            <div class="date">
+              {{ item.date }}
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="right-calendar"></div>
+    <!-- 右侧部分 -->
+    <div class="right-calendar">
+      <div class="image-zone">
+        <div class="info-zone">
+          <span class="month">{{ calendarData.currentInfo.month + 1 }}月</span>
+          <span class="date">{{ calendarData.currentInfo.date }}日</span>
+          <span class="day">{{
+            weekConfig[calendarData.currentInfo.day]
+          }}</span>
+        </div>
+      </div>
+      <div class="form-zone">
+        <div class="form-title">
+          <span>当天数据</span>
+        </div>
+        <div class="form-container">
+          <div class="form-box">
+            <div class="form-title">基础数据</div>
+            <el-row :gutter="0" justify="space-around">
+              <el-col :span="8">
+                <span class="label">第一个</span>
+              </el-col>
+              <el-col :span="16">
+                <el-input size="small"></el-input>
+              </el-col>
+            </el-row>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -158,25 +210,26 @@ onMounted(() => {
     margin: 0 10px;
     display: flex;
     flex-direction: column;
+    color: $font-color-black;
     .table-info {
       height: 50px;
       width: 100%;
       line-height: 50px;
       padding: 0 30px;
       box-sizing: border-box;
-      .today-btn{
-        margin:0 20px;
+      .today-btn {
+        margin: 0 20px;
       }
-      .arrow-btn{
+      .arrow-btn {
         margin: 0;
       }
-      .year-val{
-        margin:0 5px 0 30px;
+      .year-val {
+        margin: 0 5px 0 30px;
       }
-      span{
+      span {
         font-weight: bold;
         font-size: 16px;
-        color: gray;
+        color: $font-color-gray;
       }
     }
     .table-zone {
@@ -208,15 +261,86 @@ onMounted(() => {
         .calendar-item {
           flex: 1;
           min-width: 14%;
-          padding: 10px 5px;
+          padding: 12px 10px;
           border: 1px solid rgb(172, 255, 255);
           box-sizing: border-box;
+          .date {
+            color: $font-color-black;
+          }
         }
       }
     }
   }
   .right-calendar {
     width: 20%;
+    box-sizing: border-box;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    .image-zone {
+      height: 300px;
+      width: 100%;
+      background: rgb(248, 248, 248);
+      border-radius: 8px;
+      padding-top: 20px;
+      .info-zone {
+        line-height: 30px;
+        height: 30px;
+        float: right;
+        span {
+          font-size: 20px;
+          font-weight: bold;
+          color: gray;
+          &.month {
+            margin-right: 2px;
+          }
+          &.date {
+            margin-right: 20px;
+          }
+          &.day {
+            margin-right: 30px;
+          }
+        }
+      }
+    }
+    .form-zone {
+      width: 100%;
+      height: auto;
+      background: rgb(248, 248, 248);
+      flex: 1;
+      border-radius: 8px;
+      margin-top: 10px;
+      padding: 10px;
+      box-sizing: border-box;
+      .form-title {
+        height: 40px;
+        line-height: 40px;
+        font-size: 168x;
+        font-weight: bold;
+        margin-left: 10px;
+        color: $font-color-black;
+      }
+      .form-container {
+        height: 90%;
+        width: 100%;
+        background: rgb(255, 255, 255);
+        .form-title {
+          font-size: 14px;
+          color: $font-color-gray;
+        }
+        .form-box {
+          margin: 3px 6px;
+          padding: 5px 15px;
+          background: rgb(235, 235, 235);
+          font-size: 14px;
+          .el-row {
+            line-height: 30px;
+            height: 30px;
+            margin-bottom: 5px;
+          }
+        }
+      }
+    }
   }
 }
 </style>

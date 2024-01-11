@@ -90,19 +90,12 @@ const putCharacter = async (id) => {
     let params = { id };
     let res = await sanguoApi.addViewCharacter(params);
     if (res.data && res.code === "200") {
-      let newSearchList = [];
-      let newViewList = [];
       JSON.parse(JSON.stringify(searchList.value)).forEach((item) => {
         if (item._id === id) {
           item.view = true;
-          newViewList.push(item);
-        } else if (item.view) {
-          newViewList.push(item);
+          viewList.value.push(item);
         }
-        newSearchList.push(item);
       });
-      searchList.value = newSearchList;
-      viewList.value = newViewList;
     }
   } else {
     ElMessage({
@@ -213,8 +206,8 @@ const dialogCancel = () => {
 let dialogSubmit = async () => {
   let postData = {
     name: form.obj.name,
-    birth: Number(form.obj.birth),
-    death: Number(form.obj.death),
+    birth: form.obj.birth,
+    death: form.obj.death,
     country: form.obj.country,
   };
   let data = "";
@@ -288,7 +281,7 @@ const searchHandler = async () => {
     };
     let res = await sanguoApi.searchCharacter(params);
     if (res.code === "200") {
-      searchList.value = res.data;
+      searchList.value = res.data.list;
     } else {
       characterHandler();
     }
@@ -402,18 +395,17 @@ const dragStart = (e) => {
 };
 
 const listenHandler = (e, type) => {
-  console.log("eType", e, type);
   if (type) {
     document.addEventListener("keypress", keyPressHandler);
-  }else{
-    document.removeEventListener('keypress',keyPressHandler)
+  } else {
+    document.removeEventListener("keypress", keyPressHandler);
   }
 };
-const keyPressHandler = e => {
-  if(e.keyCode === 13){
-    searchHandler()
+const keyPressHandler = (e) => {
+  if (e.keyCode === 13) {
+    searchHandler();
   }
-}
+};
 
 // 执行函数
 initYear();
@@ -670,13 +662,13 @@ onMounted(() => {});
         box-sizing: border-box;
         padding: 10px;
         float: left;
-      
+
         overflow: hidden;
 
         .search-container {
           height: 100%;
-        overflow-y: auto;
-        overflow-x: clip;  
+          overflow-y: auto;
+          overflow-x: clip;
           padding: 5px;
         }
       }
