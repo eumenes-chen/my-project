@@ -71,7 +71,6 @@ const monthData = reactive({
 });
 // 日期列表数据
 const dateList = ref(null);
-//
 /**
  * 发起请求日期列表
  * params {{ start:dayjs, end:dayjs }}
@@ -81,13 +80,13 @@ const getDateList = (params) => {
   calendarApi.getDate(params).then((res) => {
     if (res.code === "200") {
       dateList.value = res.data.list;
-      if (!dateData.info._id) {
+      if (!dateData.info.date) {
         let selectDate = dateData.dayjs.format("YYYY-MM-DD");
         let target = dateList.value.find((item) => {
           return item.date === selectDate;
         });
         console.log("target", target);
-        if (target._id) {
+        if (target.date) {
           changeDate(target);
         }
       }
@@ -123,7 +122,7 @@ const submitHandler = (params) => {
         message: "保存成功",
       });
       let targetIndex = dateList.value.findIndex((item) => {
-        return item._id === params._id;
+        return item.date === params.date;
       });
       if (targetIndex > -1) {
         let changeItem = {

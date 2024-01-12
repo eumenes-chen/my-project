@@ -19,9 +19,12 @@ let pageSize = ref(12);
 let tableConfig = reactive({
   list: [
     { prop: "id" },
-    { prop: "date", label: "日期", width: "300", fixed: true },
-    { prop: "dateStamp", label: "时间戳", width: "300" },
-    { prop: "weight", label: "体重", width: "200" },
+    { prop: "date", label: "日期", width: "150", fixed: true },
+    { prop: "weight", label: "体重", width: "130" },
+    { prop: "title", label: "标题", width: "150" },
+    { prop: "content", label: "记录", width: "200" },
+    { prop: "dateStamp", label: "时间戳", width: "150" },
+
   ],
 });
 // 搜索信息

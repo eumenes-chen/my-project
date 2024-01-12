@@ -44,8 +44,10 @@ let selectedDate = reactive({
   },
 });
 let formData = reactive({
-  _id: "",
+  date: "",
   weight: "",
+  title: "",
+  content: "",
 });
 
 // 监听日期(reactive)
@@ -85,6 +87,8 @@ const tableData = reactive({
       date: "",
       dateStamp: "",
       weight: "",
+      title: "",
+      content: "",
     },
   ],
 });
@@ -93,7 +97,7 @@ const setFormData = (data) => {
   for (let prop in formData) {
     formData[prop] = data[prop] || "";
   }
-  console.log("formData", formData);
+  console.log("data", data, formData);
 };
 
 /**
@@ -239,7 +243,13 @@ onMounted(() => {
               {{ dateFilter(item.date, "date") }}
             </div>
             <div class="info" v-if="item.weight">
-              <span>w: {{ item.weight }}</span>
+              <span>体重: {{ item.weight }}</span>
+            </div>
+            <div class="info" v-if="item.title">
+              <span>标题: {{ item.title }}</span>
+            </div>
+            <div class="info" v-if="item.content">
+              <span>记录: {{ item.content }}</span>
             </div>
           </div>
         </div>
@@ -269,10 +279,26 @@ onMounted(() => {
             <div class="form-title">基础数据</div>
             <el-row :gutter="0" justify="space-around">
               <el-col :span="8">
-                <span class="label">第一个</span>
+                <span class="label">体重</span>
               </el-col>
               <el-col :span="16">
                 <el-input size="small" v-model="formData.weight"></el-input>
+              </el-col>
+            </el-row>
+            <el-row :gutter="0" justify="space-around">
+              <el-col :span="8">
+                <span class="label">标题</span>
+              </el-col>
+              <el-col :span="16">
+                <el-input size="small" v-model="formData.title"></el-input>
+              </el-col>
+            </el-row>
+            <el-row :gutter="0" justify="space-around">
+              <el-col :span="8">
+                <span class="label">记录</span>
+              </el-col>
+              <el-col :span="16">
+                <el-input size="small" v-model="formData.content"></el-input>
               </el-col>
             </el-row>
           </div>
@@ -356,10 +382,11 @@ onMounted(() => {
         .calendar-item {
           flex: 1;
           min-width: 14%;
+          min-height: 15%;
           padding: 12px 10px;
           border: 1px solid rgb(172, 255, 255);
           box-sizing: border-box;
-          background-color: rgb(201, 201, 201);
+          background-color: rgb(230, 230, 230);
           color: $font-color-black;
           opacity: 0.5;
           &.current-month {
