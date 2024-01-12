@@ -5,7 +5,6 @@ import { useRouter } from "vue-router";
 import Sanguo from "./Sanguo.vue";
 import Date from "./Date.vue";
 import Manage3 from "./Manage3.vue";
-console.log("组件", Sanguo, Manage3);
 const componets = {
   Sanguo: Sanguo,
   Date: Date,

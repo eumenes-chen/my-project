@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch, markRaw } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+
 // 引入组件
 import Table from "./table.vue";
 import Timeline from "./timeline.vue";
@@ -43,32 +45,53 @@ const tabList = reactive({
   ],
 });
 // 日期数据
-const calendarData = reactive({
-  currentInfo: {
-    dayjs: "", // dayjs
-    month: "", // dayjs
-  },
+const dateData = reactive({
+  dayjs: "", // dayjs
+  info: {},
   methods: {
     getDateList: (params) => {
       return getDateList(params);
     },
+    changeDate: (params) => {
+      return changeDate(params);
+    },
+    submitHandler: (params) => {
+      return submitHandler(params);
+    },
+  },
+});
+// 月份数据
+const monthData = reactive({
+  dayjs: "",
+  methods: {
     changeMonth: (params) => {
       return changeMonth(params);
     },
   },
 });
 // 日期列表数据
-const dateList = ref(null)
+const dateList = ref(null);
 //
 /**
  * 发起请求日期列表
  * params {{ start:dayjs, end:dayjs }}
  */
 const getDateList = (params) => {
-  console.log("日期列表params", params);
+  console.log("请求列表");
   calendarApi.getDate(params).then((res) => {
-    console.log("日期列表", res.data.list);
-    dateList.value = res.data.list
+    if (res.code === "200") {
+      dateList.value = res.data.list;
+      if (!dateData.info._id) {
+        let selectDate = dateData.dayjs.format("YYYY-MM-DD");
+        let target = dateList.value.find((item) => {
+          return item.date === selectDate;
+        });
+        console.log("target", target);
+        if (target._id) {
+          changeDate(target);
+        }
+      }
+    }
   });
 };
 /**
@@ -76,18 +99,41 @@ const getDateList = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeMonth = (params) => {
-  console.log('params',params);
-  calendarData.currentInfo.month = dayjs(params)
+  monthData.dayjs = dayjs(params);
 };
 /**
- * 根据日期获取该日期内容
- * params { dayjs }
+ * 修改当前显示日期，并获取详情
+ * params { date:YYYY-MM-DD }
  */
-const getCurrentDate = (dateInfo) => {
-  calendarData.currentInfo = {
-    dayjs: dateInfo,
-    month: dateInfo,
-  };
+const changeDate = (params) => {
+  console.log("选中日期", params);
+  dateData.dayjs = dayjs(params.date);
+  dateData.info = params;
+};
+/**
+ * 提交日期详情
+ * params { obj }
+ */
+const submitHandler = (params) => {
+  console.log("params", params);
+  calendarApi.editDate(params).then((res) => {
+    if (res.code === "200") {
+      ElMessage({
+        type: "success",
+        message: "保存成功",
+      });
+      let targetIndex = dateList.value.findIndex((item) => {
+        return item._id === params._id;
+      });
+      if (targetIndex > -1) {
+        let changeItem = {
+          ...dateList.value[targetIndex],
+          ...params,
+        };
+        dateList.value.splice(targetIndex, 1, changeItem);
+      }
+    }
+  });
 };
 
 // 点击tab
@@ -108,7 +154,8 @@ const initActiveName = () => {
 // 初始化日期数据
 const initDate = () => {
   let today = dayjs("2024-01-12");
-  getCurrentDate(today);
+  dateData.dayjs = today;
+  monthData.dayjs = today;
 };
 
 onMounted(() => {
@@ -129,7 +176,8 @@ onMounted(() => {
         >
           <component
             :is="item.component"
-            :calendarData="calendarData"
+            :dateData="dateData"
+            :monthData="monthData"
             :dateList="dateList"
           ></component>
           {{ index }}
@@ -184,8 +232,5 @@ onMounted(() => {
       }
     }
   }
-  // .main {
-
-  // }
 }
 </style>

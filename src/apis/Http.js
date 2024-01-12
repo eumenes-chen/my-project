@@ -9,7 +9,6 @@ let http = axios.create({
 })
 http.interceptors.request.use(
     (res) => {
-        console.log('请求拦截',res);
         return res;
     },
     (err) => {

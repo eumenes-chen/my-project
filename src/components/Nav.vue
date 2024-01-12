@@ -34,8 +34,6 @@ const init = () => {
 };
 const chooseNav = (e) => {
   let routerName = e.target.getAttribute("routerName");
-  console.log('routerName',routerName);
-  console.log('$router',$router);
   $router.push({ name: routerName });
 };
 // 更新nav选中状态

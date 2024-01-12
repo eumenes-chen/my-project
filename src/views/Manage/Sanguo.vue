@@ -37,7 +37,6 @@ watchEffect(() => {});
 
 // 打开弹出框
 const eventHandler = (type, index, row) => {
-  console.log("触发", type, index, row);
   let params = {
     name: row.name,
     birth: Number(row.birth),
@@ -49,7 +48,6 @@ const eventHandler = (type, index, row) => {
       ElMessage({ message: "不能添加空数据", type: "warning" });
     } else {
       sanguoApi.addCharacter(row).then((res) => {
-        console.log("res:", res);
         if (res.code === "200") {
           row._id = res.data[0]._id;
           row.created = true;
@@ -60,7 +58,12 @@ const eventHandler = (type, index, row) => {
   } else if (type === "save") {
     if (row._id) {
       sanguoApi.editCharacter(row).then((res) => {
-        console.log("res1:", res);
+        if (res.code !== "200") {
+          ElMessage({
+            type: "warning",
+            message: "编辑失败",
+          });
+        }
       });
     }
   } else if (type === "delete") {
@@ -73,7 +76,6 @@ const eventHandler = (type, index, row) => {
         getCharacterList();
       }
     });
-    console.log("删除", index, row);
   }
 };
 
@@ -88,7 +90,6 @@ const getCharacterList = () => {
     pageSize: pageSize.value,
   };
   sanguoApi.searchCharacter(params).then((res) => {
-    console.log("rse", res);
     if (res.code === "200") {
       tableData.tableList = res.data.list.map((item) => {
         return { ...item, created: true };
@@ -104,7 +105,6 @@ const addEmptyRow = () => {
   tableConfig.list.forEach((item) => {
     return (row[item.prop] = "");
   });
-  console.log("row:", row);
   return row;
 };
 // 搜索事件
@@ -115,7 +115,6 @@ const searchHandler = () => {
     let params = {
       value: searchValue.value,
     };
-    console.log("搜索", params);
     sanguoApi.searchCharacter(params).then((res) => {
       if (res.code === "200") {
         tableData.tableList = res.data.list.map((item) => {
@@ -141,7 +140,6 @@ const keyPressHandler = (e) => {
 };
 // 改变页数
 const changePage = (page) => {
-  console.log("page", page);
   curPage.value = page;
   getCharacterList();
 };

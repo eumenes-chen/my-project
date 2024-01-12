@@ -35,11 +35,9 @@ watchEffect(() => {});
 
 // 打开弹出框
 const eventHandler = (type, index, row) => {
-  console.log("触发", type, index, row);
   if (type === "save") {
     if (row._id) {
       calendarApi.editDate(row).then((res) => {
-        console.log("res1", res.code, res.code === "200");
         if (res.code === "200") {
           // getDateList()
         }
@@ -47,7 +45,6 @@ const eventHandler = (type, index, row) => {
     }
   } else if (type === "delete") {
     calendarApi.deleteDate(row).then((res) => {
-      console.log("res:", res);
       if (res.code === "200") {
         ElMessage({
           type: "success",
@@ -56,7 +53,6 @@ const eventHandler = (type, index, row) => {
         getDateList();
       }
     });
-    console.log("删除", index, row);
   }
 };
 
@@ -71,7 +67,6 @@ const getDateList = () => {
     pageSize: pageSize.value,
   };
   calendarApi.getDate(params).then((res) => {
-    console.log("res2", res.code, res.code === "200");
     if (res.code === "200") {
       tableData.tableList = res.data.list;
       total.value = res.data.total;
@@ -86,7 +81,6 @@ const searchHandler = () => {
     let params = {
       value: searchValue.value,
     };
-    console.log("搜索", params);
     calendarApi.searchDate(params).then((res) => {
       if (res.code === "200") {
         tableData.tableList = res.data.list.map((item) => {
@@ -111,7 +105,6 @@ const keyPressHandler = (e) => {
 };
 // 改变页数
 const changePage = (page) => {
-  console.log("page", page);
   curPage.value = page;
   getDateList();
 };

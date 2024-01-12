@@ -5,7 +5,11 @@ import TableLayout from "element-plus/es/components/table/src/table-layout";
 
 // 接收props
 let props = defineProps({
-  calendarData: {
+  dateData: {
+    type: Object,
+    default: {},
+  },
+  monthData: {
     type: Object,
     default: {},
   },
@@ -32,46 +36,46 @@ const monthConfig = [
 // 当前日期数据
 let selectedDate = reactive({
   currentDate: {
-    year: "",
-    month: "",
-    date: "",
-    day: "",
+    date: "", // YYYY-MM-DD
   },
   currentMonth: {
     year: "",
     month: "",
   },
 });
-
-// 监听当前日期的变化
-watch(props.calendarData, (newVal) => {
-  console.log("calendarData变化");
-  selectedDate.currentDate = {
-    year: newVal.currentInfo.dayjs.year() || "",
-    month: newVal.currentInfo.dayjs.month() || "",
-    date: newVal.currentInfo.dayjs.date() || "",
-    day: newVal.currentInfo.dayjs.day() || "",
-  };
-  selectedDate.currentMonth = {
-    year: newVal.currentInfo.month.year() || "",
-    month: newVal.currentInfo.month.month() || "",
-  };
-  initTable(newVal.currentInfo.month);
+let formData = reactive({
+  _id: "",
+  weight: "",
 });
-// 监听日期列表
+
+// 监听日期(reactive)
+watch(props.dateData, (newVal) => {
+  console.log("监听到日期变化");
+  selectedDate.currentDate.date = newVal.dayjs.format("YYYY-MM-DD") || "";
+  setFormData(newVal.info);
+});
+// 监听月份(reactive)
+watch(props.monthData, (newVal) => {
+  console.log("监听到月份变化");
+  selectedDate.currentMonth = {
+    year: newVal.dayjs.year() || "",
+    month: newVal.dayjs.month() || "",
+  };
+  initTable(newVal.dayjs);
+});
+// 监听日期列表(ref)
 watch(
   () => props.dateList,
   (newVal) => {
-    console.log("dateList变化", newVal);
+    console.log("监听到列表变化", newVal);
     tableData.list = tableData.list.map((item, index) => {
       let target = newVal[index];
-      if (item.date === dayjs(target.date).date()) {
-        console.log('item',item.fromActiveMonth);
-        Object.assign(target, {fromActiveMonth:item.fromActiveMonth});
-        return target;
-      }
+      Object.assign(target, { fromActiveMonth: item.fromActiveMonth });
+      return target;
     });
-    console.log("结果", tableData.list);
+  },
+  {
+    deep: true,
   }
 );
 // 日期数据
@@ -84,6 +88,13 @@ const tableData = reactive({
     },
   ],
 });
+// 处理详情数据
+const setFormData = (data) => {
+  for (let prop in formData) {
+    formData[prop] = data[prop] || "";
+  }
+  console.log("formData", formData);
+};
 
 /**
  * 根据时间判断当月的天数
@@ -106,7 +117,6 @@ const initTable = (monthDate) => {
   tableData.list = [];
   let dateInfo = dayjs(monthDate);
   let lastMonth = dateInfo.add(-1, "month").startOf("month");
-  let dayNumOfMonth = dateInfo.daysInMonth();
   let dayNumOfLastMonth = lastMonth.daysInMonth();
   let date = dateInfo.date();
   let day = dateInfo.day();
@@ -133,36 +143,42 @@ const initTable = (monthDate) => {
     fromActiveMonth = date === dayNumOfLastMonth ? false : fromActiveMonth;
     newList.unshift({ dateInfo, date, day, fromActiveMonth });
   }
-  console.log("newList", newList);
   tableData.list = newList;
   let params = {
     start: newList[0].dateInfo.format("YYYY-MM-DD"),
     end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
   };
   // 根据首位日期请求日期列表
-  props.calendarData.methods.getDateList(params);
+  props.dateData.methods.getDateList(params);
 };
 
 /**
- * 改变选中月份
+ * 改变选中月份 YYYY-MM-DD
  */
 const changeMonth = (type) => {
   let month = "";
   if (type === "prev") {
-    month = props.calendarData.currentInfo.month
-      .subtract(1, "month")
-      .format("YYYY-MM-DD");
+    month = props.monthData.dayjs.subtract(1, "month").format("YYYY-MM-DD");
   } else if (type === "next") {
-    month = props.calendarData.currentInfo.month
-      .add(1, "month")
-      .format("YYYY-MM-DD");
+    month = props.monthData.dayjs.add(1, "month").format("YYYY-MM-DD");
   }
-  props.calendarData.methods.changeMonth(month);
+  props.monthData.methods.changeMonth(month);
+};
+/**
+ * 改变选中的日期 obj
+ */
+const changeDate = (item) => {
+  props.dateData.methods.changeDate(item);
+};
+/**
+ * 保存事件
+ */
+const submitHandler = () => {
+  props.dateData.methods.submitHandler(formData);
 };
 // 日期过滤器
 const dateFilter = computed(() => {
   return function (value, type) {
-    console.log("value", value, type);
     let res = "";
     if (type === "date" && value.length) {
       res = value.split("-")[2].replace(/^0/, "");
@@ -213,11 +229,17 @@ onMounted(() => {
             class="calendar-item"
             v-for="(item, index) in tableData.list"
             :key="index + '_' + item.date + '_' + item.day"
-            :class="{ 'current-month': item.fromActiveMonth }"
+            :class="{
+              'current-month': item.fromActiveMonth,
+              'current-date': item.date === selectedDate.currentDate.date,
+            }"
+            @click="changeDate(item)"
           >
             <div class="date">
               {{ dateFilter(item.date, "date") }}
-              {{item.weight}}
+            </div>
+            <div class="info" v-if="item.weight">
+              <span>w: {{ item.weight }}</span>
             </div>
           </div>
         </div>
@@ -227,10 +249,14 @@ onMounted(() => {
     <div class="right-calendar">
       <div class="image-zone">
         <div class="info-zone">
-          <span class="month">{{ selectedDate.currentDate.month + 1 }}月</span>
-          <span class="date">{{ selectedDate.currentDate.date }}日</span>
+          <span class="month"
+            >{{ selectedDate.currentDate.date.split("-")[1] }}月</span
+          >
+          <span class="date"
+            >{{ selectedDate.currentDate.date.split("-")[2] }}日</span
+          >
           <span class="day">{{
-            weekConfig[selectedDate.currentDate.day]
+            weekConfig[selectedDate.currentDate.date.split("-")[2]]
           }}</span>
         </div>
       </div>
@@ -246,10 +272,13 @@ onMounted(() => {
                 <span class="label">第一个</span>
               </el-col>
               <el-col :span="16">
-                <el-input size="small"></el-input>
+                <el-input size="small" v-model="formData.weight"></el-input>
               </el-col>
             </el-row>
           </div>
+        </div>
+        <div class="form-bottom">
+          <el-button type="primary" @click="submitHandler">保存</el-button>
         </div>
       </div>
     </div>
@@ -337,8 +366,26 @@ onMounted(() => {
             background-color: white;
             opacity: 1;
           }
+          &.current-date {
+            border: 2px solid gray;
+          }
           .date {
             color: $font-color-black;
+          }
+          .info {
+            width: 100%;
+            border-radius: 4px;
+            background: rgba(226, 226, 226, 0.3);
+            height: 24px;
+            color: gray;
+            padding: 0 10px;
+            box-sizing: border-box;
+            margin: 5px 0;
+            overflow: hidden;
+            span {
+              line-height: 24px;
+              font-size: 12px;
+            }
           }
         }
       }
@@ -381,20 +428,23 @@ onMounted(() => {
       height: auto;
       background: rgb(248, 248, 248);
       flex: 1;
+      display: flex;
+      flex-direction: column;
       border-radius: 8px;
       margin-top: 10px;
-      padding: 10px;
+      padding: 10px 10px 0 10px;
       box-sizing: border-box;
+      overflow: hidden;
       .form-title {
-        height: 40px;
-        line-height: 40px;
+        height: 34px;
+        line-height: 30px;
         font-size: 168x;
         font-weight: bold;
         margin-left: 10px;
         color: $font-color-black;
       }
       .form-container {
-        height: 90%;
+        flex: 1;
         width: 100%;
         background: rgb(255, 255, 255);
         .form-title {
@@ -411,6 +461,21 @@ onMounted(() => {
             height: 30px;
             margin-bottom: 5px;
           }
+        }
+      }
+      .form-bottom {
+        height: 50px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        .el-button {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          top: 0;
+          margin: auto;
+          width: 100px;
         }
       }
     }
