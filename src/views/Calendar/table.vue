@@ -282,7 +282,11 @@ onMounted(() => {
                 <span class="label">体重</span>
               </el-col>
               <el-col :span="16">
-                <el-input size="small" v-model="formData.weight"></el-input>
+                <el-input
+                  size="small"
+                  v-model="formData.weight"
+                  @blur="submitHandler"
+                ></el-input>
               </el-col>
             </el-row>
             <el-row :gutter="0" justify="space-around">
@@ -290,7 +294,11 @@ onMounted(() => {
                 <span class="label">标题</span>
               </el-col>
               <el-col :span="16">
-                <el-input size="small" v-model="formData.title"></el-input>
+                <el-input
+                  size="small"
+                  v-model="formData.title"
+                  @blur="submitHandler"
+                ></el-input>
               </el-col>
             </el-row>
             <el-row :gutter="0" justify="space-around">
@@ -298,13 +306,14 @@ onMounted(() => {
                 <span class="label">记录</span>
               </el-col>
               <el-col :span="16">
-                <el-input size="small" v-model="formData.content"></el-input>
+                <el-input
+                  size="small"
+                  v-model="formData.content"
+                  @blur="submitHandler"
+                ></el-input>
               </el-col>
             </el-row>
           </div>
-        </div>
-        <div class="form-bottom">
-          <el-button type="primary" @click="submitHandler">保存</el-button>
         </div>
       </div>
     </div>
@@ -459,7 +468,7 @@ onMounted(() => {
       flex-direction: column;
       border-radius: 8px;
       margin-top: 10px;
-      padding: 10px 10px 0 10px;
+      padding: 10px;
       box-sizing: border-box;
       overflow: hidden;
       .form-title {
@@ -488,21 +497,6 @@ onMounted(() => {
             height: 30px;
             margin-bottom: 5px;
           }
-        }
-      }
-      .form-bottom {
-        height: 50px;
-        width: 100%;
-        text-align: center;
-        position: relative;
-        .el-button {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          top: 0;
-          margin: auto;
-          width: 100px;
         }
       }
     }
