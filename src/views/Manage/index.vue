@@ -4,11 +4,11 @@ import { useRouter } from "vue-router";
 // import { ElMenu, ElMenuItem, ElSubMenu } from "element-plus";
 import Sanguo from "./Sanguo.vue";
 import Date from "./Date.vue";
-import Manage3 from "./Manage3.vue";
+import Money from "./Money.vue";
 const componets = {
   Sanguo: Sanguo,
   Date: Date,
-  Manage3: Manage3,
+  Money: Money,
 };
 
 const $router = useRouter();
@@ -20,10 +20,10 @@ const menuList = reactive([
     label: "calendar",
     subMenu: [
       { title: "日期数据", label: "date", component: "Date" },
-      { title: "子导航2", label: "child2", component: "Manage3" },
+      { title: "金额", label: "money", component: "Money" },
     ],
   },
-  { title: "管理系统3", label: "manage3", component: "Manage3" },
+  { title: "管理系统3", label: "money", component: "Money" },
 ]);
 const activeIndex = ref($router.currentRoute.value.query.active);
 const currentComponent = shallowRef(null);

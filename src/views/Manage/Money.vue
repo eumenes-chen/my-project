@@ -2,7 +2,6 @@
 import { computed, onMounted, watchEffect, reactive, ref, nextTick } from "vue";
 import { ElMessage } from "element-plus";
 // // 引入请求
-import sanguoApi from "../../apis/sanguo";
 import calendarApi from "../../apis/calendar";
 
 // 列表数据
@@ -19,13 +18,15 @@ let pageSize = ref(12);
 let tableConfig = reactive({
   list: [
     { prop: "id" },
-    { prop: "date", label: "日期", width: "150", fixed: true },
-    { prop: "weight", label: "体重", width: "130" },
-    { prop: "title", label: "标题", width: "150" },
-    { prop: "content", label: "记录", width: "200" },
-    { prop: "dateStamp", label: "时间戳", width: "150" },
-
+    { prop: "date", label: "日期", width: "250", fixed: true },
+    { prop: "money", label: "金额", width: "200" },
+    { prop: "type", label: "类型", width: "200",type:'select',options:['支出','收入'] },
+    { prop: "detail", label: "详情", width: "200",type:'select',options:[''] },
   ],
+  options: {
+    income:['工资','红包','其他收入'],
+    expend:['衣服','饮食','房租','出行','娱乐','购物','其他支出']
+  }
 });
 // 搜索信息
 let searchValue = ref("");
@@ -118,7 +119,7 @@ init();
 onMounted(() => {});
 </script>
 <template>
-  <div id="Date">
+  <div id="Income">
     <div class="head-zone">
       <div class="search-zone">
         <el-input

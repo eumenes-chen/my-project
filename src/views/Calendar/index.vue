@@ -98,6 +98,7 @@ const getDateList = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeMonth = (params) => {
+  console.log('params',params);
   monthData.dayjs = dayjs(params);
 };
 /**
@@ -105,7 +106,8 @@ const changeMonth = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeDate = (params) => {
-  console.log("选中日期", params);
+  console.log("选中日期", dayjs(params.date));
+  monthData.dayjs = dayjs(params.date);
   dateData.dayjs = dayjs(params.date);
   dateData.info = params;
 };
@@ -152,7 +154,7 @@ const initActiveName = () => {
 
 // 初始化日期数据
 const initDate = () => {
-  let today = dayjs("2024-01-12");
+  let today = dayjs();
   dateData.dayjs = today;
   monthData.dayjs = today;
 };

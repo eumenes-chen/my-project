@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
 import dayjs from "dayjs";
-import TableLayout from "element-plus/es/components/table/src/table-layout";
 
 // 接收props
 let props = defineProps({
@@ -118,6 +117,7 @@ const getDayNumOfMonth = (date) => {
  * params { date:YYYY-MM-DD }(该月的某天)
  */
 const initTable = (monthDate) => {
+  console.log("初始化表格", monthDate);
   tableData.list = [];
   let dateInfo = dayjs(monthDate);
   let lastMonth = dateInfo.add(-1, "month").startOf("month");
@@ -144,7 +144,10 @@ const initTable = (monthDate) => {
     dateInfo = dateInfo.subtract(1, "day");
     date = dateInfo.date();
     day = dateInfo.day();
-    fromActiveMonth = date === dayNumOfLastMonth ? false : fromActiveMonth;
+    if (fromActiveMonth) {
+      fromActiveMonth =
+        dateInfo.month() === lastMonth.month() ? false : fromActiveMonth;
+    }
     newList.unshift({ dateInfo, date, day, fromActiveMonth });
   }
   tableData.list = newList;
@@ -162,11 +165,19 @@ const initTable = (monthDate) => {
 const changeMonth = (type) => {
   let month = "";
   if (type === "prev") {
-    month = props.monthData.dayjs.subtract(1, "month").format("YYYY-MM-DD");
+    month = props.monthData.dayjs.subtract(1, "month");
   } else if (type === "next") {
-    month = props.monthData.dayjs.add(1, "month").format("YYYY-MM-DD");
+    month = props.monthData.dayjs.add(1, "month");
   }
   props.monthData.methods.changeMonth(month);
+};
+/**
+ * 选中今日
+ */
+const todayHandler = () => {
+  let dateStr = dayjs().format("YYYY-MM-DD");
+  // props.monthData.methods.changeMonth(dateStr)
+  props.dateData.methods.changeDate(dateStr);
 };
 /**
  * 改变选中的日期 obj
@@ -203,7 +214,9 @@ onMounted(() => {
     <!-- 中部日历部分 -->
     <div class="center-calendar">
       <div class="table-info">
-        <el-button type="primary" class="today-btn">今日</el-button>
+        <el-button type="primary" class="today-btn" @click="todayHandler"
+          >今日</el-button
+        >
         <el-button type="default" class="arrow-btn" @click="changeMonth('prev')"
           >前</el-button
         >
@@ -308,11 +321,20 @@ onMounted(() => {
               <el-col :span="16">
                 <el-input
                   size="small"
+                  type="textarea"
                   v-model="formData.content"
                   @blur="submitHandler"
                 ></el-input>
               </el-col>
             </el-row>
+          </div>
+          <div class="form-box">
+            <div class="form-title">金额数据</div>
+            <svg style="width: 600px; height: 600px">
+              <!-- 'xlink：href执行用哪一个图标,属性值务必icon-图标名字·' -->
+              <!-- use标签fi11属性可以设置图标的颜色 -->
+              <use xlink:href="jiahao2fill" fill="red"></use>
+            </svg>
           </div>
         </div>
       </div>
@@ -398,6 +420,10 @@ onMounted(() => {
           background-color: rgb(230, 230, 230);
           color: $font-color-black;
           opacity: 0.5;
+          cursor: pointer;
+          &:hover {
+            border: 1px solid gray;
+          }
           &.current-month {
             background-color: white;
             opacity: 1;
@@ -494,7 +520,7 @@ onMounted(() => {
           font-size: 14px;
           .el-row {
             line-height: 30px;
-            height: 30px;
+            // height: 30px;
             margin-bottom: 5px;
           }
         }
