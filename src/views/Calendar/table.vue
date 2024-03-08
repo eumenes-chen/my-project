@@ -57,12 +57,8 @@ watch(props.dateData, (newVal) => {
 });
 // 监听月份(reactive)
 watch(props.monthData, (newVal) => {
-  console.log("监听到月份变化");
-  selectedDate.currentMonth = {
-    year: newVal.dayjs.year() || "",
-    month: newVal.dayjs.month() || "",
-  };
-  initTable(newVal.dayjs);
+  console.log("监听到月份变化", selectedDate);
+  initTable();
 });
 // 监听日期列表(ref)
 watch(
@@ -96,7 +92,6 @@ const setFormData = (data) => {
   for (let prop in formData) {
     formData[prop] = data[prop] || "";
   }
-  console.log("data", data, formData);
 };
 
 /**
@@ -116,47 +111,55 @@ const getDayNumOfMonth = (date) => {
  * 创建表格日历
  * params { date:YYYY-MM-DD }(该月的某天)
  */
-const initTable = (monthDate) => {
-  console.log("初始化表格", monthDate);
-  tableData.list = [];
-  let dateInfo = dayjs(monthDate);
-  let lastMonth = dateInfo.add(-1, "month").startOf("month");
-  let dayNumOfLastMonth = lastMonth.daysInMonth();
-  let date = dateInfo.date();
-  let day = dateInfo.day();
-  let newList = [];
-  let fromActiveMonth = true;
-  // 正向循环
-  while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
-    newList.push({ dateInfo, date, day, fromActiveMonth });
-    dateInfo = dateInfo.add(1, "day");
-    date = dateInfo.date();
-    day = dateInfo.day();
-    fromActiveMonth = date === 1 ? false : fromActiveMonth;
-  }
-  // 数据初始化
-  dateInfo = dayjs(monthDate);
-  date = dateInfo.date();
-  day = dateInfo.day();
-  fromActiveMonth = true;
-  // 反向循环
-  while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
-    dateInfo = dateInfo.subtract(1, "day");
-    date = dateInfo.date();
-    day = dateInfo.day();
-    if (fromActiveMonth) {
-      fromActiveMonth =
-        dateInfo.month() === lastMonth.month() ? false : fromActiveMonth;
+const initTable = () => {
+  console.log("props", props);
+  let monthDate = props.monthData.dayjs || "";
+  if (monthDate) {
+    selectedDate.currentMonth = {
+      year: props.monthData.dayjs.year() || "",
+      month: props.monthData.dayjs.month() || "",
+    };
+    console.log("初始化表格", monthDate);
+    tableData.list = [];
+    let dateInfo = dayjs(monthDate);
+    let lastMonth = dateInfo.add(-1, "month").startOf("month");
+    let dayNumOfLastMonth = lastMonth.daysInMonth();
+    let date = dateInfo.date();
+    let day = dateInfo.day();
+    let newList = [];
+    let fromActiveMonth = true;
+    // 正向循环
+    while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
+      newList.push({ dateInfo, date, day, fromActiveMonth });
+      dateInfo = dateInfo.add(1, "day");
+      date = dateInfo.date();
+      day = dateInfo.day();
+      fromActiveMonth = date === 1 ? false : fromActiveMonth;
     }
-    newList.unshift({ dateInfo, date, day, fromActiveMonth });
+    // 数据初始化
+    dateInfo = dayjs(monthDate);
+    date = dateInfo.date();
+    day = dateInfo.day();
+    fromActiveMonth = true;
+    // 反向循环
+    while (fromActiveMonth || (!fromActiveMonth && day !== 0)) {
+      dateInfo = dateInfo.subtract(1, "day");
+      date = dateInfo.date();
+      day = dateInfo.day();
+      if (fromActiveMonth) {
+        fromActiveMonth =
+          dateInfo.month() === lastMonth.month() ? false : fromActiveMonth;
+      }
+      newList.unshift({ dateInfo, date, day, fromActiveMonth });
+    }
+    tableData.list = newList;
+    let params = {
+      start: newList[0].dateInfo.format("YYYY-MM-DD"),
+      end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
+    };
+    // 根据首位日期请求日期列表
+    props.dateData.methods.getDateList(params);
   }
-  tableData.list = newList;
-  let params = {
-    start: newList[0].dateInfo.format("YYYY-MM-DD"),
-    end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
-  };
-  // 根据首位日期请求日期列表
-  props.dateData.methods.getDateList(params);
 };
 
 /**
@@ -203,8 +206,8 @@ const dateFilter = computed(() => {
 });
 
 onMounted(() => {
-  // let today = dayjs().format();
-  // initTable(today);
+  console.log("table触发onMounted");
+  initTable();
 });
 </script>
 <template>

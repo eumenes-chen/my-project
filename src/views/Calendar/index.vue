@@ -16,30 +16,27 @@ import calendarApi from "../../apis/calendar";
 const $router = useRouter();
 const $route = useRoute();
 const activeName = ref(null); // 激活的tab
-const components = reactive({
-  table: markRaw(Table),
-  timeline: markRaw(Timeline),
-  chart: markRaw(Chart),
-});
+// const components = reactive({
+//   table: markRaw(Table),
+//   timeline: markRaw(Timeline),
+//   chart: markRaw(Chart),
+// });
 
 const tabList = reactive({
   list: [
     {
       title: "表格",
       name: "table",
-      component: components.table,
       active: false,
     },
     {
       title: "时间线",
       name: "timeline",
-      component: components.timeline,
       active: false,
     },
     {
       title: "折线图",
       name: "chart",
-      component: components.chart,
       active: false,
     },
   ],
@@ -98,7 +95,7 @@ const getDateList = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeMonth = (params) => {
-  console.log('params',params);
+  console.log("params", params);
   monthData.dayjs = dayjs(params);
 };
 /**
@@ -140,7 +137,9 @@ const submitHandler = (params) => {
 // 点击tab
 const tabsHandler = (e) => {
   let paneName = e.paneName;
-  $router.push({ query: { active: paneName } });
+  console.log("paneName", paneName);
+  $router.push({ name: paneName });
+
 };
 // 默认选中tab
 const initActiveName = () => {
@@ -175,15 +174,28 @@ onMounted(() => {
           :label="item.title"
           :name="item.name"
         >
-          <component
+          <!-- <component
             :is="item.component"
             :dateData="dateData"
             :monthData="monthData"
             :dateList="dateList"
-          ></component>
-          {{ index }}
+          ></component> -->
         </el-tab-pane>
       </el-tabs>
+      <div class="container">
+        <!-- 左侧部分 -->
+        <div class="left"></div>
+        <!-- 中部部分 -->
+        <div class="center">
+          <RouterView
+            :dateData="dateData"
+            :monthData="monthData"
+            :dateList="dateList"
+          ></RouterView>
+        </div>
+        <!-- 右侧部分 -->
+        <div class="right"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -197,9 +209,9 @@ onMounted(() => {
     height: 100%;
     margin: 10px 0;
     :deep(.el-tabs) {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+      // height: 100%;
+      // display: flex;
+      // flex-direction: column;
       .el-tabs__header {
         background: $background-color-opacity;
         height: 50px;
@@ -220,16 +232,34 @@ onMounted(() => {
           }
         }
       }
-      .el-tabs__content {
-        width: 100%;
+    }
+    .container {
+      width: 100%;
+      height: 100%;
+      // background: $background-color-opacity;
+      display: flex;
+      & > div {
+        background: $background-color-opacity;
+        border-radius: 8px;
+        height: 100%;
+      }
+      .left {
+        width: 8%;
+        height: 100%;
+      }
+      .center {
         flex: 1;
-        min-height: 600px;
-        max-height: 900px;
-        // background: $background-color-opacity;
-        padding-bottom: 10px;
-        .el-tab-pane {
-          height: 100%;
-        }
+        margin: 0 10px;
+        display: flex;
+        flex-direction: column;
+        color: $font-color-black;
+      }
+      .right {
+        width: 20%;
+        box-sizing: border-box;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
       }
     }
   }

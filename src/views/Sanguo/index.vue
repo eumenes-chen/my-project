@@ -90,13 +90,14 @@ const putCharacter = async (id) => {
     let params = { id };
     let res = await sanguoApi.addViewCharacter(params);
     if (res.data && res.code === "200") {
-      JSON.parse(JSON.stringify(searchList.value)).forEach((item) => {
+      searchList.value.forEach((item) => {
         if (item._id === id) {
           item.view = true;
           viewList.value.push(item);
         }
       });
     }
+    console.log('viewList',searchList.value,viewList.value);
   } else {
     ElMessage({
       type: "warning",
