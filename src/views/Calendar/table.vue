@@ -32,6 +32,19 @@ const monthConfig = [
   { title: "十一月", totalDays: 30 },
   { title: "十二月", totalDays: 31 },
 ];
+
+// 日期数据
+const tableData = reactive({
+  list: [
+    // {
+    //   date: "",
+    //   dateStamp: "",
+    //   weight: "",
+    //   title: "",
+    //   content: "",
+    // },
+  ],
+});
 // 当前日期数据
 let selectedDate = reactive({
   currentDate: {
@@ -42,22 +55,18 @@ let selectedDate = reactive({
     month: "",
   },
 });
-let formData = reactive({
-  date: "",
-  weight: "",
-  title: "",
-  content: "",
-});
-
 // 监听日期(reactive)
 watch(props.dateData, (newVal) => {
-  console.log("监听到日期变化");
+  console.log("监听到日期变化",newVal);
   selectedDate.currentDate.date = newVal.dayjs.format("YYYY-MM-DD") || "";
-  setFormData(newVal.info);
 });
 // 监听月份(reactive)
-watch(props.monthData, (newVal) => {
-  console.log("监听到月份变化", selectedDate);
+watch(props.monthData, (newVal, oldVal) => {
+  console.log(
+    "监听到月份变化",
+    newVal.dayjs !== oldVal.dayjs,
+    tableData.list.length === 0
+  );
   initTable();
 });
 // 监听日期列表(ref)
@@ -75,24 +84,6 @@ watch(
     deep: true,
   }
 );
-// 日期数据
-const tableData = reactive({
-  list: [
-    {
-      date: "",
-      dateStamp: "",
-      weight: "",
-      title: "",
-      content: "",
-    },
-  ],
-});
-// 处理详情数据
-const setFormData = (data) => {
-  for (let prop in formData) {
-    formData[prop] = data[prop] || "";
-  }
-};
 
 /**
  * 根据时间判断当月的天数
@@ -112,18 +103,16 @@ const getDayNumOfMonth = (date) => {
  * params { date:YYYY-MM-DD }(该月的某天)
  */
 const initTable = () => {
-  console.log("props", props);
+  console.log("创建表格", props.monthData.dayjs);
   let monthDate = props.monthData.dayjs || "";
   if (monthDate) {
     selectedDate.currentMonth = {
       year: props.monthData.dayjs.year() || "",
       month: props.monthData.dayjs.month() || "",
     };
-    console.log("初始化表格", monthDate);
     tableData.list = [];
     let dateInfo = dayjs(monthDate);
     let lastMonth = dateInfo.add(-1, "month").startOf("month");
-    let dayNumOfLastMonth = lastMonth.daysInMonth();
     let date = dateInfo.date();
     let day = dateInfo.day();
     let newList = [];
@@ -188,12 +177,6 @@ const todayHandler = () => {
 const changeDate = (item) => {
   props.dateData.methods.changeDate(item);
 };
-/**
- * 保存事件
- */
-const submitHandler = () => {
-  props.dateData.methods.submitHandler(formData);
-};
 // 日期过滤器
 const dateFilter = computed(() => {
   return function (value, type) {
@@ -212,8 +195,6 @@ onMounted(() => {
 </script>
 <template>
   <div id="calendar-table">
-    <!-- 左侧部分 -->
-    <div class="left-calendar"></div>
     <!-- 中部日历部分 -->
     <div class="center-calendar">
       <div class="table-info">
@@ -272,76 +253,6 @@ onMounted(() => {
       </div>
     </div>
     <!-- 右侧部分 -->
-    <div class="right-calendar">
-      <div class="image-zone">
-        <div class="info-zone">
-          <span class="month"
-            >{{ selectedDate.currentDate.date.split("-")[1] }}月</span
-          >
-          <span class="date"
-            >{{ selectedDate.currentDate.date.split("-")[2] }}日</span
-          >
-          <span class="day">{{
-            weekConfig[selectedDate.currentDate.date.split("-")[2]]
-          }}</span>
-        </div>
-      </div>
-      <div class="form-zone">
-        <div class="form-title">
-          <span>当天数据</span>
-        </div>
-        <div class="form-container">
-          <div class="form-box">
-            <div class="form-title">基础数据</div>
-            <el-row :gutter="0" justify="space-around">
-              <el-col :span="8">
-                <span class="label">体重</span>
-              </el-col>
-              <el-col :span="16">
-                <el-input
-                  size="small"
-                  v-model="formData.weight"
-                  @blur="submitHandler"
-                ></el-input>
-              </el-col>
-            </el-row>
-            <el-row :gutter="0" justify="space-around">
-              <el-col :span="8">
-                <span class="label">标题</span>
-              </el-col>
-              <el-col :span="16">
-                <el-input
-                  size="small"
-                  v-model="formData.title"
-                  @blur="submitHandler"
-                ></el-input>
-              </el-col>
-            </el-row>
-            <el-row :gutter="0" justify="space-around">
-              <el-col :span="8">
-                <span class="label">记录</span>
-              </el-col>
-              <el-col :span="16">
-                <el-input
-                  size="small"
-                  type="textarea"
-                  v-model="formData.content"
-                  @blur="submitHandler"
-                ></el-input>
-              </el-col>
-            </el-row>
-          </div>
-          <div class="form-box">
-            <div class="form-title">金额数据</div>
-            <svg style="width: 600px; height: 600px">
-              <!-- 'xlink：href执行用哪一个图标,属性值务必icon-图标名字·' -->
-              <!-- use标签fi11属性可以设置图标的颜色 -->
-              <use xlink:href="jiahao2fill" fill="red"></use>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -350,21 +261,17 @@ onMounted(() => {
 #calendar-table {
   width: 100%;
   height: 100%;
-  // background: $background-color-opacity;
   display: flex;
   & > div {
     background: $background-color-opacity;
     border-radius: 8px;
     height: 100%;
   }
-  .left-calendar {
-    width: 8%;
-  }
   .center-calendar {
-    flex: 1;
     margin: 0 10px;
-    display: flex;
-    flex-direction: column;
+    height: 100%;
+    // display: flex;
+    // flex-direction: column;
     color: $font-color-black;
     .table-info {
       height: 50px;
@@ -389,7 +296,8 @@ onMounted(() => {
     }
     .table-zone {
       width: 100%;
-      flex: 1;
+      height: calc(100% - 50px);
+      position: relative;
       .calendar-head {
         height: 5%;
         width: 100%;
@@ -413,6 +321,7 @@ onMounted(() => {
         position: relative;
         display: flex;
         flex-wrap: wrap;
+        overflow: hidden;
         .calendar-item {
           flex: 1;
           min-width: 14%;

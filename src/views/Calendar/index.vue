@@ -3,10 +3,10 @@ import { computed, onMounted, reactive, ref, watch, markRaw } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 
-// 引入组件
-import Table from "./table.vue";
-import Timeline from "./timeline.vue";
-import Chart from "./chart.vue";
+// // 引入组件
+// import Table from "./table.vue";
+// import Timeline from "./timeline.vue";
+// import Chart from "./chart.vue";
 // 引入插件
 import dayjs from "dayjs";
 // // 引入请求
@@ -16,12 +16,7 @@ import calendarApi from "../../apis/calendar";
 const $router = useRouter();
 const $route = useRoute();
 const activeName = ref(null); // 激活的tab
-// const components = reactive({
-//   table: markRaw(Table),
-//   timeline: markRaw(Timeline),
-//   chart: markRaw(Chart),
-// });
-
+const weekConfig = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 const tabList = reactive({
   list: [
     {
@@ -68,25 +63,40 @@ const monthData = reactive({
 });
 // 日期列表数据
 const dateList = ref(null);
+// 当天数据
+let formData = reactive({
+  date: "",
+  weight: "",
+  title: "",
+  content: "",
+});
+
+// 处理详情数据
+const setFormData = (data) => {
+  for (let prop in formData) {
+    formData[prop] = data[prop] || "";
+  }
+};
 /**
  * 发起请求日期列表
  * params {{ start:dayjs, end:dayjs }}
  */
 const getDateList = (params) => {
-  console.log("请求列表");
+  console.log("请求列表", params);
   calendarApi.getDate(params).then((res) => {
     if (res.code === "200") {
       dateList.value = res.data.list;
-      if (!dateData.info.date) {
-        let selectDate = dateData.dayjs.format("YYYY-MM-DD");
-        let target = dateList.value.find((item) => {
-          return item.date === selectDate;
-        });
-        console.log("target", target);
-        if (target.date) {
-          changeDate(target);
-        }
-      }
+      console.log("请求列表完成");
+      // if (!dateData.info.date) {
+      //   let selectDate = dateData.dayjs.format("YYYY-MM-DD");
+      //   let target = dateList.value.find((item) => {
+      //     return item.date === selectDate;
+      //   });
+      //   console.log("target", target);
+      //   if (target.date) {
+      //     changeDate(target);
+      //   }
+      // }
     }
   });
 };
@@ -103,32 +113,42 @@ const changeMonth = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeDate = (params) => {
-  console.log("选中日期", dayjs(params.date));
-  monthData.dayjs = dayjs(params.date);
+  console.log(
+    "选中日期",
+    dayjs(params.date).format("yyyy-mm-dd"),
+    monthData.dayjs.format("yyyy-mm-dd")
+  );
+  if (dayjs(params.date).month() !== monthData.dayjs.month()) {
+    console.log("修改月份dayjs");
+    monthData.dayjs = dayjs(params.date);
+  }
   dateData.dayjs = dayjs(params.date);
   dateData.info = params;
+  console.log("dateData", dateData);
+  setFormData(params);
 };
 /**
  * 提交日期详情
  * params { obj }
  */
-const submitHandler = (params) => {
-  console.log("params", params);
-  calendarApi.editDate(params).then((res) => {
+const submitHandler = () => {
+  console.log("提交params");
+  calendarApi.editDate(formData).then((res) => {
     if (res.code === "200") {
       ElMessage({
         type: "success",
         message: "保存成功",
       });
       let targetIndex = dateList.value.findIndex((item) => {
-        return item.date === params.date;
+        return item.date === formData.date;
       });
       if (targetIndex > -1) {
         let changeItem = {
           ...dateList.value[targetIndex],
-          ...params,
+          ...formData,
         };
         dateList.value.splice(targetIndex, 1, changeItem);
+        console.log("dateList的splice");
       }
     }
   });
@@ -139,16 +159,6 @@ const tabsHandler = (e) => {
   let paneName = e.paneName;
   console.log("paneName", paneName);
   $router.push({ name: paneName });
-
-};
-// 默认选中tab
-const initActiveName = () => {
-  if ($route.query.active) {
-    activeName.value = $route.query.active;
-  } else {
-    activeName.value = tabList.list[0].name;
-    $router.push({ query: { active: activeName.value } });
-  }
 };
 
 // 初始化日期数据
@@ -159,9 +169,17 @@ const initDate = () => {
 };
 
 onMounted(() => {
-  initActiveName();
+  console.log("index触发onMounted");
   initDate();
 });
+watch(
+  () => $route.path,
+  (newPath, oldPath) => {
+    initDate();
+    console.log("跳转", newPath);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -194,7 +212,74 @@ onMounted(() => {
           ></RouterView>
         </div>
         <!-- 右侧部分 -->
-        <div class="right"></div>
+        <div class="right">
+          <div class="image-zone">
+            <div class="info-zone" v-if="dateData.info.date">
+              <span class="month"
+                >{{ dateData.info.date.split("-")[1] }}月</span
+              >
+              <span class="date">{{ dateData.info.date.split("-")[2] }}日</span>
+              <span class="day">
+                {{ weekConfig[dateData.dayjs.$M] }}
+              </span>
+            </div>
+          </div>
+          <div class="form-zone">
+            <div class="form-title">
+              <span>当天数据</span>
+            </div>
+            <div class="form-container">
+              <div class="form-box">
+                <div class="form-title">基础数据</div>
+                <el-row :gutter="0" justify="space-around">
+                  <el-col :span="8">
+                    <span class="label">体重</span>
+                  </el-col>
+                  <el-col :span="16">
+                    <el-input
+                      size="small"
+                      v-model="formData.weight"
+                      @blur="submitHandler"
+                    ></el-input>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="0" justify="space-around">
+                  <el-col :span="8">
+                    <span class="label">标题</span>
+                  </el-col>
+                  <el-col :span="16">
+                    <el-input
+                      size="small"
+                      v-model="formData.title"
+                      @blur="submitHandler"
+                    ></el-input>
+                  </el-col>
+                </el-row>
+                <el-row :gutter="0" justify="space-around">
+                  <el-col :span="8">
+                    <span class="label">记录</span>
+                  </el-col>
+                  <el-col :span="16">
+                    <el-input
+                      size="small"
+                      type="textarea"
+                      v-model="formData.content"
+                      @blur="submitHandler"
+                    ></el-input>
+                  </el-col>
+                </el-row>
+              </div>
+              <div class="form-box">
+                <div class="form-title">金额数据</div>
+                <svg style="width: 600px; height: 600px">
+                  <!-- 'xlink：href执行用哪一个图标,属性值务必icon-图标名字·' -->
+                  <!-- use标签fi11属性可以设置图标的颜色 -->
+                  <use xlink:href="jiahao2fill" fill="red"></use>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -235,7 +320,7 @@ onMounted(() => {
     }
     .container {
       width: 100%;
-      height: 100%;
+      height: 90%;
       // background: $background-color-opacity;
       display: flex;
       & > div {
@@ -260,6 +345,73 @@ onMounted(() => {
         padding: 10px;
         display: flex;
         flex-direction: column;
+        .image-zone {
+          height: 300px;
+          width: 100%;
+          background: rgb(248, 248, 248);
+          border-radius: 8px;
+          padding-top: 20px;
+          .info-zone {
+            line-height: 30px;
+            height: 30px;
+            float: right;
+            span {
+              font-size: 20px;
+              font-weight: bold;
+              color: gray;
+              &.month {
+                margin-right: 2px;
+              }
+              &.date {
+                margin-right: 20px;
+              }
+              &.day {
+                margin-right: 30px;
+              }
+            }
+          }
+        }
+        .form-zone {
+          width: 100%;
+          height: auto;
+          background: rgb(248, 248, 248);
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          border-radius: 8px;
+          margin-top: 10px;
+          padding: 10px;
+          box-sizing: border-box;
+          overflow: hidden;
+          .form-title {
+            height: 34px;
+            line-height: 30px;
+            font-size: 168x;
+            font-weight: bold;
+            margin-left: 10px;
+            color: $font-color-black;
+          }
+          .form-container {
+            flex: 1;
+            width: 100%;
+            background: rgb(255, 255, 255);
+            .form-title {
+              font-size: 14px;
+              color: $font-color-gray;
+            }
+            .form-box {
+              margin: 3px 6px;
+              padding: 5px 15px;
+              background: rgb(235, 235, 235);
+              font-size: 14px;
+              .el-row {
+                line-height: 30px;
+                // height: 30px;
+                margin-bottom: 5px;
+              }
+            }
+          }
+        }
       }
     }
   }
