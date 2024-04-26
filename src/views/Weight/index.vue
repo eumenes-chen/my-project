@@ -412,7 +412,7 @@ const getChart = () => {
             },
             {
               yAxis: 140, label: {
-                formatter: () => '千峰学vue2020'
+                formatter: () => 'vue2020'
               }
             },
             {

@@ -15,7 +15,9 @@ import calendarApi from "../../apis/calendar";
 // dayjs().format()
 const $router = useRouter();
 const $route = useRoute();
+let currentTab = ref(""); // 当前页名
 const activeName = ref(null); // 激活的tab
+let child = ref(null);
 const weekConfig = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 const tabList = reactive({
   list: [
@@ -86,17 +88,7 @@ const getDateList = (params) => {
   calendarApi.getDate(params).then((res) => {
     if (res.code === "200") {
       dateList.value = res.data.list;
-      console.log("请求列表完成");
-      // if (!dateData.info.date) {
-      //   let selectDate = dateData.dayjs.format("YYYY-MM-DD");
-      //   let target = dateList.value.find((item) => {
-      //     return item.date === selectDate;
-      //   });
-      //   console.log("target", target);
-      //   if (target.date) {
-      //     changeDate(target);
-      //   }
-      // }
+      console.log("请求列表完成", $route.path);
     }
   });
 };
@@ -126,6 +118,11 @@ const changeDate = (params) => {
   dateData.info = params;
   console.log("dateData", dateData);
   setFormData(params);
+  let formBox =
+    document.getElementsByClassName("form-box")[0].children[1].children[1]
+      .children[0].children[0].children[0];
+  formBox.select();
+  console.log("formBox", formBox);
 };
 /**
  * 提交日期详情
@@ -166,8 +163,14 @@ const initDate = () => {
   let today = dayjs();
   dateData.dayjs = today;
   monthData.dayjs = today;
-};
+    console.log('monthData',monthData.dayjs.month());
 
+  console.log("执行子组件的initTable", child.value);
+  child.value.initTable();
+};
+const viewHandler = () => {
+  console.log("123");
+};
 onMounted(() => {
   console.log("index触发onMounted");
   initDate();
@@ -175,8 +178,22 @@ onMounted(() => {
 watch(
   () => $route.path,
   (newPath, oldPath) => {
-    initDate();
-    console.log("跳转", newPath);
+    let today = dayjs();
+    dateData.dayjs = today;
+    monthData.dayjs = today;
+    currentTab.value = newPath.split("/").pop();
+    console.log("跳转", currentTab.value);
+    switch (currentTab.value) {
+      case "table":
+        false;
+        break;
+      case "timeline":
+        child.value.initTable();
+        break;
+      case "chart":
+        child.value.initTable();
+        break;
+    }
   },
   { immediate: true }
 );
@@ -205,11 +222,15 @@ watch(
         <div class="left"></div>
         <!-- 中部部分 -->
         <div class="center">
-          <RouterView
-            :dateData="dateData"
-            :monthData="monthData"
-            :dateList="dateList"
-          ></RouterView>
+          <router-view v-slot="{ Component }">
+            <component
+              ref="child"
+              :is="Component"
+              :dateData="dateData"
+              :monthData="monthData"
+              :dateList="dateList"
+            ></component>
+          </router-view>
         </div>
         <!-- 右侧部分 -->
         <div class="right">

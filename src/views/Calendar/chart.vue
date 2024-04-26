@@ -1,6 +1,6 @@
 <script setup>
 import * as echarts from "echarts";
-import { computed, onMounted, onActivated, reactive, ref, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from "vue";
 // 引入插件
 import dayjs from "dayjs";
 // 接收props
@@ -29,14 +29,25 @@ let dateList = [];
 // 事件数据
 let eventList = [];
 const planSetting = [
-  { date: "2023-03-01", weight: 160 },
-  { date: "2023-10-01", weight: 160 },
-  { date: "2023-11-01", weight: 150 },
-  { date: "2023-12-01", weight: 140 },
-  { date: "2024-02-01", weight: 130 },
-  { date: "2024-04-01", weight: 145 },
-  { date: "2024-05-01", weight: 130 },
-  { date: "2024-08-01", weight: 120 },
+  { date: "2023-03-01", weight: 157 },
+  { date: "2023-05-01", weight: 158 },
+  { date: "2023-07-01", weight: 160 },
+  { date: "2023-07-01", weight: 160 },
+  { date: "2023-08-01", weight: 158 },
+  { date: "2023-09-01", weight: 149 },
+  { date: "2023-10-01", weight: 140 },
+  { date: "2023-11-01", weight: 135 },
+  { date: "2023-12-01", weight: 130 },
+  { date: "2024-01-10", weight: 125 },
+  { date: "2024-02-01", weight: 128 },
+  { date: "2024-03-01", weight: 132 },
+  { date: "2024-03-20", weight: 135 },
+  { date: "2024-04-15", weight: 135 },
+  { date: "2024-05-15", weight: 128 },
+  { date: "2024-06-15", weight: 122 },
+  { date: "2024-06-25", weight: 120 },
+  { date: "2024-08-15", weight: 122 },
+  { date: "2024-12-01", weight: 125 },
 ];
 
 // 监听日期(reactive)
@@ -62,24 +73,21 @@ const initList = () => {
     let realArr = [];
     let dateArr = [];
     let eventArr = [];
-    console.log("planObj", planObj);
     props.dateList.forEach((item, index) => {
-      // console.log('item',item.date);
       if (planObj[item.date]) {
-        console.log("执行", item.date);
-        planArr.push(planObj[item.date]);
+        planArr.push(planObj[item.date].toFixed(2));
       } else {
         planArr.push("");
       }
-      eventArr.push({
-        coord: [index, item.weight],
-        value: item.title,
-      });
+      if (item.title) {
+        eventArr.push({
+          coord: [index, item.weight],
+          value: item.title,
+        });
+      }
       realArr.push(item.weight || "");
       dateArr.push(item.date.split("-").join("/"));
     });
-    console.log("realArr", realArr);
-
     realList = realArr;
     planList = planArr;
     dateList = dateArr;
@@ -126,109 +134,6 @@ const initPlan = () => {
 const getChart = () => {
   console.log("执行getChart");
   var myChart = echarts.init(document.getElementById("calendar-echart-dom"));
-  // 计算echarts数据
-  // let base = +new Date(2023, 7, 8);
-  // let oneDay = 24 * 3600 * 1000;
-  // let dateList = [];
-  // let planData = [];
-  // let nowWeight = 155;
-  // let k = 3;
-  // let aday = 0.5;
-  // for (let i = 1; i < 235; i++) {
-  //   var now = new Date((base += oneDay));
-  //   dateList.push(
-  //     [now.getFullYear(), now.getMonth() + 1, now.getDate()].join("/")
-  //   );
-  //   switch (true) {
-  //     case nowWeight >= 150:
-  //       k = 4;
-  //       break;
-  //     case nowWeight >= 145:
-  //       k = 4;
-  //       break;
-  //     case nowWeight >= 140:
-  //       k = 4;
-  //       break;
-  //     case nowWeight >= 135:
-  //       k = 5;
-  //       break;
-  //     case nowWeight >= 130:
-  //       k = 7;
-  //       break;
-  //     case nowWeight >= 125:
-  //       k = 9;
-  //       break;
-  //     default:
-  //       k = 10;
-  //       break;
-  //   }
-  //   aday = 1 / k;
-  //   nowWeight = (nowWeight - aday).toFixed(3);
-  //   planData.push(nowWeight > 125 ? nowWeight : 125);
-  //   k--;
-  // }
-
-  // // 事件列表
-  // const eventList = [
-  //   { date: "2023/8/13", value: "云" },
-  //   { date: "2023/8/16", value: "9" },
-  //   { date: "2023/8/22", value: "9" },
-  //   { date: "2023/8/26", value: "分离" },
-  //   { date: "2023/8/31", value: "兴隆" },
-  //   { date: "2023/9/4", value: "中等" },
-  //   { date: "2023/9/8", value: "10" },
-  //   { date: "2023/9/11", value: "10" },
-  //   { date: "2023/9/14", value: "兴隆" },
-  //   { date: "2023/9/17", value: "醒悟" },
-  //   { date: "2023/9/18", value: "面试" },
-  //   { date: "2023/9/23", value: "兴隆" },
-  //   { date: "2023/9/24", value: "毕业" },
-  //   { date: "2023/9/26", value: "火车" },
-  //   { date: "2023/9/27", value: "回齐" },
-  //   { date: "2023/9/29", value: "中秋" },
-  //   { date: "2023/10/1", value: "国庆" },
-  //   { date: "2023/10/7", value: "国庆结束" },
-  //   { date: "2023/10/9", value: "兴隆" },
-  //   { date: "2023/10/11", value: "香槟" },
-  //   { date: "2023/10/13", value: "offer" },
-  //   { date: "2023/10/16", value: "失去" },
-  //   { date: "2023/10/17", value: "入职" },
-  //   { date: "2023/10/18", value: "交房租" },
-  //   { date: "2023/10/19", value: "10" },
-  //   { date: "2023/10/21", value: "涮肉" },
-  //   { date: "2023/10/23", value: "周一" },
-  //   { date: "2023/10/28", value: "骑行" },
-  //   { date: "2023/10/30", value: "周一" },
-  //   { date: "2023/11/6", value: "周一" },
-  //   { date: "2023/11/13", value: "周一" },
-  //   { date: "2023/11/15", value: "请假" },
-  //   { date: "2023/11/20", value: "周一" },
-  //   { date: "2023/11/25", value: "加班" },
-  //   { date: "2023/11/27", value: "周一" },
-  //   { date: "2023/12/15", value: "发工资" },
-  //   { date: "2024/1/1", value: "元旦" },
-  //   { date: "2024/1/15", value: "发工资" },
-  //   { date: "2024/2/10", value: "春节" },
-  //   { date: "2024/2/17", value: "结束" },
-  // ];
-  // // 处理后的事件列表
-  // let handleEventList = [];
-  // const initEvent = () => {
-  //   let eachData = {};
-  //   let dataIndex = "";
-  //   eventList.forEach((item) => {
-  //     dataIndex = dateList.indexOf(item.date);
-  //     eachData = {
-  //       value: item.value,
-  //       coord: [dataIndex, planData[dataIndex]],
-  //     };
-  //     handleEventList.push(eachData);
-  //   });
-  // };
-  // initEvent();
-  // console.log("dateList", dateList);
-  // console.log("planData", planData);
-  // console.log("事件列表", handleEventList);
   myChart.setOption({
     tooltip: {
       trigger: "axis",
@@ -261,8 +166,8 @@ const getChart = () => {
         formatter: "{value} 斤",
       },
       scale: true,
-      min: 110,
-      max: 170,
+      min: 115,
+      max: 165,
     },
     dataZoom: [
       {
@@ -297,12 +202,23 @@ const getChart = () => {
         },
         markLine: {
           data: [
-            {
-              yAxis: 157.5,
-              label: {
-                formatter: () => "2023",
-              },
-            },
+            { yAxis: 160,label: { formatter: () => "肥胖" } },
+            { yAxis: 157.5,label: { formatter: () => "2023" } },
+            { yAxis: 155,label: { formatter: () => "益彰后" } },
+            { yAxis: 152.5,label: { formatter: () => "居家" } },
+            { yAxis: 150,label: { formatter: () => "益彰" } },
+            { yAxis: 147.5,label: { formatter: () => "宇" } },
+            { yAxis: 145,label: { formatter: () => "待业" } },
+            { yAxis: 142.5,label: { formatter: () => "博彦" } },
+            { yAxis: 140,label: { formatter: () => "毕业" } },
+            { yAxis: 137.5,label: { formatter: () => "设计" } },
+            { yAxis: 135,label: { formatter: () => "新寝室" } },
+            { yAxis: 132.5,label: { formatter: () => "军训" } },
+            { yAxis: 130,label: { formatter: () => "高中" } },
+            { yAxis: 127.5,label: { formatter: () => "无氧" } },
+            { yAxis: 125,label: { formatter: () => "正常" } },
+            { yAxis: 122.5,label: { formatter: () => "偏瘦" } },
+            { yAxis: 120,label: { formatter: () => "成功" } },
           ],
         },
         data: planList,
@@ -387,6 +303,9 @@ onMounted(() => {
   // initList();
   // getChart();
 });
+onBeforeUnmount(() => {
+  console.log('销毁');
+})
 </script>
 <template>
   <div id="calendar-chart">

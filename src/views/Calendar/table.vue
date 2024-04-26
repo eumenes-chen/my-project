@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch, watchEffect } from "vue";
+import { computed, onMounted, reactive, ref, watch, defineExpose } from "vue";
 import dayjs from "dayjs";
 
 // 接收props
@@ -57,18 +57,29 @@ let selectedDate = reactive({
 });
 // 监听日期(reactive)
 watch(props.dateData, (newVal) => {
-  console.log("监听到日期变化",newVal);
-  selectedDate.currentDate.date = newVal.dayjs.format("YYYY-MM-DD") || "";
-});
-// 监听月份(reactive)
-watch(props.monthData, (newVal, oldVal) => {
   console.log(
-    "监听到月份变化",
-    newVal.dayjs !== oldVal.dayjs,
-    tableData.list.length === 0
+    "监听到日期变化",
+    newVal.dayjs.format("M"),
+    selectedDate.currentMonth.month
   );
-  initTable();
+  selectedDate.currentDate.date = newVal.dayjs.format("YYYY-MM-DD") || "";
+  if (newVal.dayjs.format("M") != selectedDate.currentMonth.month) {
+    initTable();
+    selectedDate.currentMonth = {
+      year:newVal.dayjs.format("YYYY"),
+      month:newVal.dayjs.format("M")
+    }
+  }
 });
+// // 监听月份(reactive)
+// watch(props.monthData, (newVal, oldVal) => {
+//   console.log(
+//     "监听到月份变化",
+//     newVal.dayjs !== oldVal.dayjs,
+//     tableData.list.length === 0
+//   );
+//   // initTable();
+// });
 // 监听日期列表(ref)
 watch(
   () => props.dateList,
@@ -146,6 +157,7 @@ const initTable = () => {
       start: newList[0].dateInfo.format("YYYY-MM-DD"),
       end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
     };
+    console.log("表格创建完成");
     // 根据首位日期请求日期列表
     props.dateData.methods.getDateList(params);
   }
@@ -192,6 +204,9 @@ onMounted(() => {
   console.log("table触发onMounted");
   initTable();
 });
+defineExpose({
+  initTable,
+});
 </script>
 <template>
   <div id="calendar-table">
@@ -209,7 +224,7 @@ onMounted(() => {
         >
         <span class="year-val">{{ selectedDate.currentMonth.year }}年</span>
         <span class="month-val"
-          >{{ selectedDate.currentMonth.month + 1 }}月</span
+          >{{ +selectedDate.currentMonth.month + 1}}月</span
         >
       </div>
       <!-- 表格区域 -->
