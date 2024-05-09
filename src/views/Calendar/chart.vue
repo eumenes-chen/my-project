@@ -43,9 +43,10 @@ const planSetting = [
   { date: "2024-03-01", weight: 132 },
   { date: "2024-03-20", weight: 135 },
   { date: "2024-04-15", weight: 135 },
-  { date: "2024-05-15", weight: 128 },
-  { date: "2024-06-15", weight: 122 },
-  { date: "2024-06-25", weight: 120 },
+  { date: "2024-05-01", weight: 135 },
+  { date: "2024-05-15", weight: 131 },
+  { date: "2024-06-15", weight: 124 },
+  { date: "2024-07-01", weight: 120 },
   { date: "2024-08-15", weight: 122 },
   { date: "2024-12-01", weight: 125 },
 ];

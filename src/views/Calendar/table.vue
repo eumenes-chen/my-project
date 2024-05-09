@@ -114,12 +114,11 @@ const getDayNumOfMonth = (date) => {
  * params { date:YYYY-MM-DD }(该月的某天)
  */
 const initTable = () => {
-  console.log("创建表格", props.monthData.dayjs);
   let monthDate = props.monthData.dayjs || "";
   if (monthDate) {
     selectedDate.currentMonth = {
       year: props.monthData.dayjs.year() || "",
-      month: props.monthData.dayjs.month() || "",
+      month: props.monthData.dayjs.month()+1 || "",
     };
     tableData.list = [];
     let dateInfo = dayjs(monthDate);
@@ -157,7 +156,6 @@ const initTable = () => {
       start: newList[0].dateInfo.format("YYYY-MM-DD"),
       end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
     };
-    console.log("表格创建完成");
     // 根据首位日期请求日期列表
     props.dateData.methods.getDateList(params);
   }
@@ -224,7 +222,7 @@ defineExpose({
         >
         <span class="year-val">{{ selectedDate.currentMonth.year }}年</span>
         <span class="month-val"
-          >{{ +selectedDate.currentMonth.month + 1}}月</span
+          >{{ +selectedDate.currentMonth.month}}月</span
         >
       </div>
       <!-- 表格区域 -->

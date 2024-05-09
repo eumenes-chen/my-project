@@ -97,21 +97,19 @@ const getDateList = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeMonth = (params) => {
-  console.log("params", params);
-  monthData.dayjs = dayjs(params);
+  console.log("params", params.month());
+  console.log('???????',params.format('YYYY-MM-DD'));
+  monthData.dayjs = dayjs(params.format('YYYY-MM-DD'));
+  child.value.initTable();
 };
 /**
  * 修改当前显示日期，并获取详情
  * params { date:YYYY-MM-DD }
  */
 const changeDate = (params) => {
-  console.log(
-    "选中日期",
-    dayjs(params.date).format("yyyy-mm-dd"),
-    monthData.dayjs.format("yyyy-mm-dd")
-  );
+  console.log("选中日期", params);
   if (dayjs(params.date).month() !== monthData.dayjs.month()) {
-    console.log("修改月份dayjs");
+    console.log("修改月份dayjs",params.date);
     monthData.dayjs = dayjs(params.date);
   }
   dateData.dayjs = dayjs(params.date);
@@ -163,7 +161,7 @@ const initDate = () => {
   let today = dayjs();
   dateData.dayjs = today;
   monthData.dayjs = today;
-    console.log('monthData',monthData.dayjs.month());
+  console.log("monthData", monthData.dayjs.month());
 
   console.log("执行子组件的initTable", child.value);
   child.value.initTable();
