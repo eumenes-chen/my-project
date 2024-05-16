@@ -50,23 +50,36 @@ const planSetting = [
   { date: "2024-08-15", weight: 122 },
   { date: "2024-12-01", weight: 125 },
 ];
+const monthColor = [
+  [{name:'4月份',xAxis:"2023/04/01"},{xAxis:"2023/04/30"}],
+  [{name:'6月份',xAxis:"2023/06/01"},{xAxis:"2023/06/30"}],
+  [{name:'8月份',xAxis:"2023/08/01"},{xAxis:"2023/08/31"}],
+  [{name:'10月份',xAxis:"2023/10/01"},{xAxis:"2023/10/31"}],
+  [{name:'12月份',xAxis:"2023/12/01"},{xAxis:"2023/12/31"}],
+  [{name:'2月份',xAxis:"2024/02/01"},{xAxis:"2024/02/29"}],
+  [{name:'4月份',xAxis:"2024/04/01"},{xAxis:"2024/04/30"}],
+  [{name:'6月份',xAxis:"2024/06/01"},{xAxis:"2024/06/30"}],
+  [{name:'8月份',xAxis:"2024/08/01"},{xAxis:"2024/08/31"}],
+  [{name:'10月份',xAxis:"2024/10/01"},{xAxis:"2024/10/31"}],
+  [{name:'12月份',xAxis:"2024/12/01"},{xAxis:"2024/12/31"}],
+]
 
 // 监听日期(reactive)
 watch(props.dateData, (newVal) => {
   console.log("监听日期");
-  let start = newVal.dayjs.add(-1, "year").format("YYYY-MM-DD");
-  let end = newVal.dayjs.add(5, "month").format("YYYY-MM-DD");
-  dateRange.value = [new Date(start), new Date(end)];
-  let params = { start, end };
-  props.dateData.methods.getDateList(params);
+  // let start = newVal.dayjs.add(-1, "year").format("YYYY-MM-DD");
+  // let end = newVal.dayjs.add(5, "month").format("YYYY-MM-DD");
+  // dateRange.value = [new Date(start), new Date(end)];
+  // let params = { start, end };
+  // props.dateData.methods.getDateList(params);
 });
-watch(
-  () => props.dateList,
-  (newVal) => {
-    console.log("监听到列表变化", newVal);
-    initList();
-  }
-);
+// watch(
+//   () => props.dateList,
+//   (newVal) => {
+//     console.log("监听到列表变化", newVal);
+//     initList();
+//   }
+// );
 // 初始化列表
 const initList = () => {
   if (props.dateList) {
@@ -239,46 +252,9 @@ const getChart = () => {
         smooth: true,
         markArea: {
           itemStyle: {
-            color: "rgba(255, 173, 177, 0.2)",
+            color: "rgba(255, 173, 177, 0.4)",
           },
-          data: [
-            [
-              {
-                name: "8月份",
-                xAxis: "2023/8/9",
-              },
-              {
-                xAxis: "2023/8/31",
-              },
-            ],
-            [
-              {
-                name: "10月份",
-                xAxis: "2023/10/1",
-              },
-              {
-                xAxis: "2023/10/31",
-              },
-            ],
-            [
-              {
-                name: "12月份",
-                xAxis: "2023/12/1",
-              },
-              {
-                xAxis: "2023/12/31",
-              },
-            ],
-            [
-              {
-                name: "2月份",
-                xAxis: "2024/2/1",
-              },
-              {
-                xAxis: "2024/2/29",
-              },
-            ],
-          ],
+          data: monthColor,
         },
       },
     ],
@@ -307,6 +283,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   console.log('销毁');
 })
+
+defineExpose({
+  initPlan,
+  initList
+});
 </script>
 <template>
   <div id="calendar-chart">

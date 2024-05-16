@@ -1,6 +1,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch, defineExpose } from "vue";
 import dayjs from "dayjs";
+import { useCalendarStore } from "@/stores/calendar";
+
+const calendarStore = useCalendarStore();
 
 // 接收props
 let props = defineProps({
@@ -56,46 +59,16 @@ let selectedDate = reactive({
   },
 });
 // 监听日期(reactive)
-watch(props.dateData, (newVal) => {
-  console.log(
-    "监听到日期变化",
-    newVal.dayjs.format("M"),
-    selectedDate.currentMonth.month
-  );
-  selectedDate.currentDate.date = newVal.dayjs.format("YYYY-MM-DD") || "";
-  if (newVal.dayjs.format("M") != selectedDate.currentMonth.month) {
-    initTable();
-    selectedDate.currentMonth = {
-      year:newVal.dayjs.format("YYYY"),
-      month:newVal.dayjs.format("M")
-    }
-  }
+watch(props.dateList, (newVal) => {
+  console.log("监听到列表变化", newVal);
+  tableData.list = newVal;
 });
-// // 监听月份(reactive)
-// watch(props.monthData, (newVal, oldVal) => {
-//   console.log(
-//     "监听到月份变化",
-//     newVal.dayjs !== oldVal.dayjs,
-//     tableData.list.length === 0
-//   );
-//   // initTable();
-// });
-// 监听日期列表(ref)
-watch(
-  () => props.dateList,
-  (newVal) => {
-    console.log("监听到列表变化", newVal);
-    tableData.list = tableData.list.map((item, index) => {
-      let target = newVal[index];
-      Object.assign(target, { fromActiveMonth: item.fromActiveMonth });
-      return target;
-    });
-  },
-  {
-    deep: true,
-  }
-);
+// 监听日期(reactive)
+watch(props.dateData, (newVal) => {
+  console.log("监听到日期变化", newVal);
+});
 
+// let dateListReactive = reactive(props.dateList)
 /**
  * 根据时间判断当月的天数
  * params { date }
@@ -108,17 +81,28 @@ const getDayNumOfMonth = (date) => {
   let res = month === 1 && isYearLeap ? 29 : monthConfig[month].totalDays;
   return res;
 };
+const setTableData = (date) => {
+  console.log('setTableData',date);
+  tableData.list = tableData.list.map((item, index) => {
+    let target = date[index];
+    Object.assign(target, { fromActiveMonth: item.fromActiveMonth });
+    return target;
+  });
+};
 
 /**
  * 创建表格日历
  * params { date:YYYY-MM-DD }(该月的某天)
  */
 const initTable = () => {
-  let monthDate = props.monthData.dayjs || "";
+  console.log("执行initTable");
+  // let monthDate = props.monthData.dayjs || "";
+  let monthDate = dayjs(calendarStore.currentDate.date);
+  console.log("monthDate", monthDate);
   if (monthDate) {
     selectedDate.currentMonth = {
-      year: props.monthData.dayjs.year() || "",
-      month: props.monthData.dayjs.month()+1 || "",
+      year: monthDate.year() || "",
+      month: monthDate.month() + 1 || "",
     };
     tableData.list = [];
     let dateInfo = dayjs(monthDate);
@@ -157,6 +141,9 @@ const initTable = () => {
       end: newList[newList.length - 1].dateInfo.format("YYYY-MM-DD"),
     };
     // 根据首位日期请求日期列表
+    console.log("initTable执行完毕", params);
+    calendarStore.dateInterval = params
+    console.log('calendarStore.dateInterval',calendarStore.dateInterval);
     props.dateData.methods.getDateList(params);
   }
 };
@@ -200,10 +187,10 @@ const dateFilter = computed(() => {
 
 onMounted(() => {
   console.log("table触发onMounted");
-  initTable();
 });
 defineExpose({
   initTable,
+  setTableData,
 });
 </script>
 <template>
@@ -221,9 +208,7 @@ defineExpose({
           >后</el-button
         >
         <span class="year-val">{{ selectedDate.currentMonth.year }}年</span>
-        <span class="month-val"
-          >{{ +selectedDate.currentMonth.month}}月</span
-        >
+        <span class="month-val">{{ +selectedDate.currentMonth.month }}月</span>
       </div>
       <!-- 表格区域 -->
       <div class="table-zone">
@@ -245,7 +230,7 @@ defineExpose({
             :key="index + '_' + item.date + '_' + item.day"
             :class="{
               'current-month': item.fromActiveMonth,
-              'current-date': item.date === selectedDate.currentDate.date,
+              'current-date': item.date === calendarStore.currentDate.date,
             }"
             @click="changeDate(item)"
           >
