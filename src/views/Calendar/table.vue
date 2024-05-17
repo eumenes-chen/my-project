@@ -11,10 +11,6 @@ let props = defineProps({
     type: Object,
     default: {},
   },
-  monthData: {
-    type: Object,
-    default: {},
-  },
   dateList: {
     type: Object,
     default: [],
@@ -82,7 +78,7 @@ const getDayNumOfMonth = (date) => {
   return res;
 };
 const setTableData = (date) => {
-  console.log('setTableData',date);
+  console.log("setTableData", date);
   tableData.list = tableData.list.map((item, index) => {
     let target = date[index];
     Object.assign(target, { fromActiveMonth: item.fromActiveMonth });
@@ -94,15 +90,14 @@ const setTableData = (date) => {
  * 创建表格日历
  * params { date:YYYY-MM-DD }(该月的某天)
  */
-const initTable = () => {
+const initTable = (month) => {
   console.log("执行initTable");
-  // let monthDate = props.monthData.dayjs || "";
-  let monthDate = dayjs(calendarStore.currentDate.date);
+  let monthDate = month || dayjs(calendarStore.currentDate.date);
   console.log("monthDate", monthDate);
   if (monthDate) {
     selectedDate.currentMonth = {
       year: monthDate.year() || "",
-      month: monthDate.month() + 1 || "",
+      month: monthDate.month() || "",
     };
     tableData.list = [];
     let dateInfo = dayjs(monthDate);
@@ -142,8 +137,7 @@ const initTable = () => {
     };
     // 根据首位日期请求日期列表
     console.log("initTable执行完毕", params);
-    calendarStore.dateInterval = params
-    console.log('calendarStore.dateInterval',calendarStore.dateInterval);
+    calendarStore.dateInterval = params;
     props.dateData.methods.getDateList(params);
   }
 };
@@ -153,20 +147,20 @@ const initTable = () => {
  */
 const changeMonth = (type) => {
   let month = "";
+  let targetMonth = dayjs(calendarStore.dateInterval.start).add(10, "day");
   if (type === "prev") {
-    month = props.monthData.dayjs.subtract(1, "month");
+    month = targetMonth.subtract(1, "month");
   } else if (type === "next") {
-    month = props.monthData.dayjs.add(1, "month");
+    month = targetMonth.add(1, "month");
   }
-  props.monthData.methods.changeMonth(month);
+  initTable(month);
 };
 /**
  * 选中今日
  */
 const todayHandler = () => {
-  let dateStr = dayjs().format("YYYY-MM-DD");
-  // props.monthData.methods.changeMonth(dateStr)
-  props.dateData.methods.changeDate(dateStr);
+  calendarStore.currentDate.date = dayjs().format("YYYY-MM-DD");
+  initTable()
 };
 /**
  * 改变选中的日期 obj
@@ -208,7 +202,9 @@ defineExpose({
           >后</el-button
         >
         <span class="year-val">{{ selectedDate.currentMonth.year }}年</span>
-        <span class="month-val">{{ +selectedDate.currentMonth.month }}月</span>
+        <span class="month-val"
+          >{{ +selectedDate.currentMonth.month + 1 }}月</span
+        >
       </div>
       <!-- 表格区域 -->
       <div class="table-zone">

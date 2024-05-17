@@ -62,15 +62,9 @@ const dateData = reactive({
     submitHandler: (params) => {
       return submitHandler(params);
     },
-  },
-});
-// 月份数据
-const monthData = reactive({
-  dayjs: "",
-  methods: {
-    changeMonth: (params) => {
-      return changeMonth(params);
-    },
+    getCurrentDate: (params) => {
+      return getCurrentDate(params)
+    }
   },
 });
 // 日期列表数据
@@ -97,7 +91,6 @@ const getDateList = (params) => {
   console.log("请求列表", params);
   calendarApi.getDate(params).then((res) => {
     if (res.code === "200") {
-      console.log("dateList", res.data.list);
       dateList.splice(0, dateList.length);
       dateList.push(...res.data.list);
       console.log("请求列表完成", dateList);
@@ -121,55 +114,42 @@ const getDateList = (params) => {
 /**
  * 获取当前日期数据
  */
-const getCurrentDate = () => {
+const getCurrentDate = (params) => {
+  console.log('params',params);
   dateData.info = calendarStore.currentDate.info;
   setFormData(dateData.info);
   console.log("getCurrentDate", dateData.info);
-};
-/**
- * 修改当前显示月份
- * params { date:YYYY-MM-DD }
- */
-const changeMonth = (params) => {
-  console.log("params", params.month());
-  console.log("???????", params.format("YYYY-MM-DD"));
-  monthData.dayjs = dayjs(params.format("YYYY-MM-DD"));
-  child.value.initTable();
 };
 /**
  * 修改当前显示日期，并获取详情
  * params { date:YYYY-MM-DD }
  */
 const changeDate = (params) => {
-  console.log("选中日期", params);
-  calendarStore.currentDate.date = params.date;
-  calendarStore.currentDate.info = params;
-  // if (dayjs(params.date).month() !== monthData.dayjs.month()) {
-  //   console.log("修改月份dayjs", params.date);
-  //   monthData.dayjs = dayjs(params.date);
-  // }
-  // dateData.dayjs = dayjs(params.date);
-  // dateData.info = params;
-  console.log("dateData", dateData);
+  console.log("选中日期", params,calendarStore.currentDate.date);
+  if (
+    params.date.split("-")[1] !== calendarStore.currentDate.date.split("-")[1]
+  ) {
+    console.log("dateInterval");
+    calendarStore.currentDate.date = params.date;
+    calendarStore.currentDate.info = params;
+    child.value.initTable();
+  } else {
+    calendarStore.currentDate.date = params.date;
+    calendarStore.currentDate.info = params;
+  }
   setFormData(params);
   let formBox =
     document.getElementsByClassName("form-box")[0].children[1].children[1]
       .children[0].children[0].children[0];
   formBox.select();
-  console.log("formBox", formBox);
 };
 /**
  * 提交日期详情
  * params { obj }
  */
 const submitHandler = () => {
-  console.log("提交params", formData);
   calendarApi.editDate(formData).then((res) => {
     if (res.code === "200") {
-      ElMessage({
-        type: "success",
-        message: "保存成功",
-      });
       let targetIndex = dateList.findIndex((item) => {
         return item.date === formData.date;
       });
@@ -179,10 +159,8 @@ const submitHandler = () => {
           ...dateList[targetIndex],
           ...formData,
         };
-        console.log("changeItem", changeItem);
         // dateList[targetIndex] = changeItem;
         dateList.splice(targetIndex, 1, changeItem);
-        console.log("dateList的splice", dateList);
       }
     }
   });
@@ -191,25 +169,20 @@ const submitHandler = () => {
 // 点击tab
 const tabsHandler = (e) => {
   let paneName = e.paneName;
-  console.log("tabs跳转", paneName);
   $router.push({ name: paneName });
 };
 
 // 初始化日期数据
 const initDate = () => {
   let today = dayjs();
-  // dateData.dayjs = today;
-  // monthData.dayjs = today;
   console.log("initDate执行了", $route.name);
   calendarStore.currentDate.date = today.format("YYYY-MM-DD");
   if ($route.name === "table") {
-    console.log("执行子组件的initTable", child);
     nextTick(() => {
       child.value.initTable();
     });
   } else if ($route.name === "chart") {
     nextTick(() => {
-      console.log("???", calendarStore.dateInterval);
       let params = {
         start:
           calendarStore.dateInterval.start ||
@@ -219,41 +192,18 @@ const initDate = () => {
           today.add(5, "month").format("YYYY-MM-DD"),
       };
       getDateList(params);
-      console.log("dateList", dateList);
-      // child.value.initPlan();
-      // child.value.initList();
     });
   }
-};
-const viewHandler = () => {
-  console.log("123");
 };
 // 初始化
 console.log("index触发初始化");
 
-onMounted(() => {
-  // initDate();
-});
+onMounted(() => {});
 watch(
   () => $route.path,
   (newPath, oldPath) => {
-    // let today = dayjs();
-    // dateData.dayjs = today;
-    // monthData.dayjs = today;
-    // currentTab.value = newPath.split("/").pop();
     console.log("监听跳转");
     initDate();
-    // switch (currentTab.value) {
-    //   case "table":
-    //     false;
-    //     break;
-    //   case "timeline":
-    //     child.value.initTable();
-    //     break;
-    //   case "chart":
-    //     child.value.initTable();
-    //     break;
-    // }
   },
   { immediate: true }
 );
@@ -269,12 +219,6 @@ watch(
           :label="item.title"
           :name="item.name"
         >
-          <!-- <component
-            :is="item.component"
-            :dateData="dateData"
-            :monthData="monthData"
-            :dateList="dateList"
-          ></component> -->
         </el-tab-pane>
       </el-tabs>
       <div class="container">
@@ -287,7 +231,6 @@ watch(
               ref="child"
               :is="Component"
               :dateData="dateData"
-              :monthData="monthData"
               :dateList="dateList"
             ></component>
           </router-view>
@@ -297,11 +240,13 @@ watch(
           <div class="image-zone">
             <div class="info-zone" v-if="dateData.info.date">
               <span class="month"
-                >{{ dateData.info.date.split("-")[1] }}月</span
+                >{{ calendarStore.currentDate.date.split("-")[1] }}月</span
               >
-              <span class="date">{{ dateData.info.date.split("-")[2] }}日</span>
+              <span class="date"
+                >{{ calendarStore.currentDate.date.split("-")[2] }}日</span
+              >
               <span class="day">
-                {{ weekConfig[dayjs(dateData.info.date).day()] }}
+                {{ weekConfig[dayjs(calendarStore.currentDate.date).day()] }}
               </span>
             </div>
           </div>
