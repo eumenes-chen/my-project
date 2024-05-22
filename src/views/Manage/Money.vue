@@ -62,21 +62,9 @@ const eventHandler = (type, index, row) => {
 
 // 初始化
 const init = () => {
-  getDateList();
+  // getDateList();
 };
-// 请求角色列表数据
-const getDateList = () => {
-  let params = {
-    curPage: curPage.value,
-    pageSize: pageSize.value,
-  };
-  calendarApi.getDate(params).then((res) => {
-    if (res.code === "200") {
-      tableData.tableList = res.data.list;
-      total.value = res.data.total;
-    }
-  });
-};
+
 // 搜索事件
 const searchHandler = () => {
   if (!searchValue.value) {

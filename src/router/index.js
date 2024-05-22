@@ -47,9 +47,9 @@ const router = createRouter({
       ],
     },
     {
-      path: "/iframe",
-      name: "iframe",
-      component: () => import("../views/Iframe/index.vue"),
+      path: "/test",
+      name: "test",
+      component: () => import("../views/Test/index.vue"),
     },
     {
       path: "/manage",

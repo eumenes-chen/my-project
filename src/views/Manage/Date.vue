@@ -24,7 +24,6 @@ let tableConfig = reactive({
     { prop: "title", label: "标题", width: "150" },
     { prop: "content", label: "记录", width: "200" },
     { prop: "dateStamp", label: "时间戳", width: "150" },
-
   ],
 });
 // 搜索信息
@@ -53,7 +52,7 @@ const eventHandler = (type, index, row) => {
           type: "success",
           message: "删除成功",
         });
-        getDateList();
+        searchHandler();
       }
     });
   }
@@ -61,7 +60,7 @@ const eventHandler = (type, index, row) => {
 
 // 初始化
 const init = () => {
-  getDateList();
+  searchHandler();
 };
 // 请求角色列表数据
 const getDateList = () => {
@@ -77,22 +76,22 @@ const getDateList = () => {
   });
 };
 // 搜索事件
-const searchHandler = () => {
-  if (!searchValue.value) {
-    getDateList();
-  } else {
-    let params = {
-      value: searchValue.value,
-    };
-    calendarApi.searchDate(params).then((res) => {
-      if (res.code === "200") {
-        tableData.tableList = res.data.list.map((item) => {
-          return { ...item, created: true };
-        });
-        total.value = res.data.total;
-      }
-    });
-  }
+const searchHandler = (page) => {
+  curPage.value = page || 1;
+  let params = {
+    value: searchValue.value,
+    curPage: curPage.value,
+    pageSize: pageSize.value,
+  };
+  console.log("搜索", params);
+  calendarApi.searchDate(params).then((res) => {
+    if (res.code === "200") {
+      tableData.tableList = res.data.list.map((item) => {
+        return { ...item, created: true };
+      });
+      total.value = res.data.total;
+    }
+  });
 };
 const listenHandler = (e, type) => {
   if (type) {
@@ -108,8 +107,9 @@ const keyPressHandler = (e) => {
 };
 // 改变页数
 const changePage = (page) => {
+  console.log("changePage", page);
   curPage.value = page;
-  getDateList();
+  searchHandler(page);
 };
 
 init();

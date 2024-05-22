@@ -1,8 +1,10 @@
 <script setup>
 import * as echarts from "echarts";
-import { computed, onMounted, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
 // 引入插件
 import dayjs from "dayjs";
+import { useCalendarStore } from "@/stores/calendar";
+const calendarStore = useCalendarStore();
 // 接收props
 let props = defineProps({
   dateData: {
@@ -25,9 +27,11 @@ let planObj = {};
 // 计划数据
 let planList = [];
 // 日期数据
-let dateList = [];
+let chartDateList = [];
 // 事件数据
 let eventList = [];
+// 选中日期
+let selectDate = ref("");
 const planSetting = [
   { date: "2023-03-01", weight: 157 },
   { date: "2023-05-01", weight: 158 },
@@ -45,41 +49,35 @@ const planSetting = [
   { date: "2024-04-15", weight: 135 },
   { date: "2024-05-01", weight: 135 },
   { date: "2024-05-15", weight: 131 },
-  { date: "2024-06-15", weight: 124 },
-  { date: "2024-07-01", weight: 120 },
-  { date: "2024-08-15", weight: 122 },
+  { date: "2024-06-15", weight: 125 },
+  { date: "2024-07-01", weight: 122 },
+  { date: "2024-07-15", weight: 120 },
   { date: "2024-12-01", weight: 125 },
 ];
 const monthColor = [
-  [{name:'4月份',xAxis:"2023/04/01"},{xAxis:"2023/04/30"}],
-  [{name:'6月份',xAxis:"2023/06/01"},{xAxis:"2023/06/30"}],
-  [{name:'8月份',xAxis:"2023/08/01"},{xAxis:"2023/08/31"}],
-  [{name:'10月份',xAxis:"2023/10/01"},{xAxis:"2023/10/31"}],
-  [{name:'12月份',xAxis:"2023/12/01"},{xAxis:"2023/12/31"}],
-  [{name:'2月份',xAxis:"2024/02/01"},{xAxis:"2024/02/29"}],
-  [{name:'4月份',xAxis:"2024/04/01"},{xAxis:"2024/04/30"}],
-  [{name:'6月份',xAxis:"2024/06/01"},{xAxis:"2024/06/30"}],
-  [{name:'8月份',xAxis:"2024/08/01"},{xAxis:"2024/08/31"}],
-  [{name:'10月份',xAxis:"2024/10/01"},{xAxis:"2024/10/31"}],
-  [{name:'12月份',xAxis:"2024/12/01"},{xAxis:"2024/12/31"}],
-]
+  [{ name: "4月份", xAxis: "2023/04/01" }, { xAxis: "2023/04/30" }],
+  [{ name: "6月份", xAxis: "2023/06/01" }, { xAxis: "2023/06/30" }],
+  [{ name: "8月份", xAxis: "2023/08/01" }, { xAxis: "2023/08/31" }],
+  [{ name: "10月份", xAxis: "2023/10/01" }, { xAxis: "2023/10/31" }],
+  [{ name: "12月份", xAxis: "2023/12/01" }, { xAxis: "2023/12/31" }],
+  [{ name: "2月份", xAxis: "2024/02/01" }, { xAxis: "2024/02/29" }],
+  [{ name: "4月份", xAxis: "2024/04/01" }, { xAxis: "2024/04/30" }],
+  [{ name: "6月份", xAxis: "2024/06/01" }, { xAxis: "2024/06/30" }],
+  [{ name: "8月份", xAxis: "2024/08/01" }, { xAxis: "2024/08/31" }],
+  [{ name: "10月份", xAxis: "2024/10/01" }, { xAxis: "2024/10/31" }],
+  [{ name: "12月份", xAxis: "2024/12/01" }, { xAxis: "2024/12/31" }],
+];
 
 // 监听日期(reactive)
 watch(props.dateData, (newVal) => {
   console.log("监听日期");
-  // let start = newVal.dayjs.add(-1, "year").format("YYYY-MM-DD");
-  // let end = newVal.dayjs.add(5, "month").format("YYYY-MM-DD");
-  // dateRange.value = [new Date(start), new Date(end)];
-  // let params = { start, end };
-  // props.dateData.methods.getDateList(params);
 });
-// watch(
-//   () => props.dateList,
-//   (newVal) => {
-//     console.log("监听到列表变化", newVal);
-//     initList();
-//   }
-// );
+watch(
+  () => [calendarStore.currentDate.date],
+  ([newVal]) => {
+    console.log("监听到选中日期变化", newVal);
+  }
+);
 // 初始化列表
 const initList = () => {
   if (props.dateList) {
@@ -100,19 +98,32 @@ const initList = () => {
         });
       }
       realArr.push(item.weight || "");
-      dateArr.push(item.date.split("-").join("/"));
+      dateArr.push(item.date);
     });
+    let currentIndex = dateArr.find((item, index) => {
+      if (item === calendarStore.currentDate.date) {
+        return index;
+      }
+    });
+    selectDate.value = [
+      {
+        coord: [currentIndex, calendarStore.currentDate],
+        title: "当前日期",
+      },
+    ];
+    console.log("selectDate数据", calendarStore.currentDate);
     realList = realArr;
     planList = planArr;
-    dateList = dateArr;
+    chartDateList = dateArr;
     eventList = eventArr;
     console.log("planList数据", planList);
     console.log("realList数据", planList);
-    console.log("dateList数据", dateList);
+    console.log("dateList数据", chartDateList);
     console.log("eventList数据", eventList);
     getChart();
   }
 };
+
 // 计算计划
 const initPlan = () => {
   let days = "";
@@ -171,7 +182,7 @@ const getChart = () => {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: dateList,
+      data: chartDateList,
     },
     yAxis: {
       type: "value",
@@ -216,23 +227,23 @@ const getChart = () => {
         },
         markLine: {
           data: [
-            { yAxis: 160,label: { formatter: () => "肥胖" } },
-            { yAxis: 157.5,label: { formatter: () => "2023" } },
-            { yAxis: 155,label: { formatter: () => "益彰后" } },
-            { yAxis: 152.5,label: { formatter: () => "居家" } },
-            { yAxis: 150,label: { formatter: () => "益彰" } },
-            { yAxis: 147.5,label: { formatter: () => "宇" } },
-            { yAxis: 145,label: { formatter: () => "待业" } },
-            { yAxis: 142.5,label: { formatter: () => "博彦" } },
-            { yAxis: 140,label: { formatter: () => "毕业" } },
-            { yAxis: 137.5,label: { formatter: () => "设计" } },
-            { yAxis: 135,label: { formatter: () => "新寝室" } },
-            { yAxis: 132.5,label: { formatter: () => "军训" } },
-            { yAxis: 130,label: { formatter: () => "高中" } },
-            { yAxis: 127.5,label: { formatter: () => "无氧" } },
-            { yAxis: 125,label: { formatter: () => "正常" } },
-            { yAxis: 122.5,label: { formatter: () => "偏瘦" } },
-            { yAxis: 120,label: { formatter: () => "成功" } },
+            { yAxis: 160, label: { formatter: () => "肥胖" } },
+            { yAxis: 157.5, label: { formatter: () => "2023" } },
+            { yAxis: 155, label: { formatter: () => "益彰后" } },
+            { yAxis: 152.5, label: { formatter: () => "居家" } },
+            { yAxis: 150, label: { formatter: () => "益彰" } },
+            { yAxis: 147.5, label: { formatter: () => "宇" } },
+            { yAxis: 145, label: { formatter: () => "待业" } },
+            { yAxis: 142.5, label: { formatter: () => "博彦" } },
+            { yAxis: 140, label: { formatter: () => "毕业" } },
+            { yAxis: 137.5, label: { formatter: () => "设计" } },
+            { yAxis: 135, label: { formatter: () => "新寝室" } },
+            { yAxis: 132.5, label: { formatter: () => "军训" } },
+            { yAxis: 130, label: { formatter: () => "高中" } },
+            { yAxis: 127.5, label: { formatter: () => "无氧" } },
+            { yAxis: 125, label: { formatter: () => "正常" } },
+            { yAxis: 122.5, label: { formatter: () => "偏瘦" } },
+            { yAxis: 120, label: { formatter: () => "成功" } },
           ],
         },
         data: planList,
@@ -259,13 +270,28 @@ const getChart = () => {
       },
     ],
   });
+  // 点击echarts事件
+  function itemOnClick(index) {
+    let params = props.dateList[index];
+    props.dateData.methods.changeDate(params);
+  }
+  myChart.getZr().on("click", function (e) {
+    let pointInPixel = [e.offsetX, e.offsetY];
+    let pointInGrid = myChart.convertFromPixel(
+      { seriesIndex: 0 },
+      pointInPixel
+    );
+    let xIndex = pointInGrid[0]; //索引
+    let handleIndex = Number(xIndex); //对应的x轴的值，也就是时间戳
+    !!itemOnClick && itemOnClick(handleIndex);
+  });
 };
 const date2Str = (date) => {
   let newDate =
     date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
   return newDate;
 };
-const changeDate = (value) => {
+const changeDateRange = (value) => {
   let start = date2Str(dateRange.value[0]);
   let end = date2Str(dateRange.value[1]);
   let params = {
@@ -281,12 +307,12 @@ onMounted(() => {
   // getChart();
 });
 onBeforeUnmount(() => {
-  console.log('销毁');
-})
+  console.log("销毁");
+});
 
 defineExpose({
   initPlan,
-  initList
+  initList,
 });
 </script>
 <template>
@@ -298,7 +324,7 @@ defineExpose({
         range-separator="至"
         start-placeholder="开始日期"
         end-placeholder="结束日期"
-        @change="changeDate"
+        @change="changeDateRange"
       />
     </div>
 

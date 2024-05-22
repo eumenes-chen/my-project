@@ -63,8 +63,8 @@ const dateData = reactive({
       return submitHandler(params);
     },
     getCurrentDate: (params) => {
-      return getCurrentDate(params)
-    }
+      return getCurrentDate(params);
+    },
   },
 });
 // 日期列表数据
@@ -115,7 +115,7 @@ const getDateList = (params) => {
  * 获取当前日期数据
  */
 const getCurrentDate = (params) => {
-  console.log('params',params);
+  console.log("params", params);
   dateData.info = calendarStore.currentDate.info;
   setFormData(dateData.info);
   console.log("getCurrentDate", dateData.info);
@@ -125,14 +125,18 @@ const getCurrentDate = (params) => {
  * params { date:YYYY-MM-DD }
  */
 const changeDate = (params) => {
-  console.log("选中日期", params,calendarStore.currentDate.date);
+  console.log("选中日期", params);
   if (
     params.date.split("-")[1] !== calendarStore.currentDate.date.split("-")[1]
   ) {
     console.log("dateInterval");
     calendarStore.currentDate.date = params.date;
     calendarStore.currentDate.info = params;
-    child.value.initTable();
+    if ($route.name === "table") {
+      nextTick(() => {
+        child.value.initTable();
+      });
+    }
   } else {
     calendarStore.currentDate.date = params.date;
     calendarStore.currentDate.info = params;
