@@ -48,11 +48,13 @@ const planSetting = [
   { date: "2024-03-20", weight: 135 },
   { date: "2024-04-15", weight: 135 },
   { date: "2024-05-01", weight: 135 },
-  { date: "2024-05-15", weight: 131 },
-  { date: "2024-06-15", weight: 125 },
-  { date: "2024-07-01", weight: 122 },
-  { date: "2024-07-15", weight: 120 },
-  { date: "2024-12-01", weight: 125 },
+  { date: "2024-06-15", weight: 130 },
+  { date: "2024-11-01", weight: 147 },
+  { date: "2024-11-15", weight: 142 },
+  { date: "2025-02-10", weight: 152 },
+  { date: "2025-03-10", weight: 142 },
+  { date: "2025-04-10", weight: 132 },
+  { date: "2025-06-10", weight: 135 },
 ];
 const monthColor = [
   [{ name: "4月份", xAxis: "2023/04/01" }, { xAxis: "2023/04/30" }],
@@ -66,6 +68,12 @@ const monthColor = [
   [{ name: "8月份", xAxis: "2024/08/01" }, { xAxis: "2024/08/31" }],
   [{ name: "10月份", xAxis: "2024/10/01" }, { xAxis: "2024/10/31" }],
   [{ name: "12月份", xAxis: "2024/12/01" }, { xAxis: "2024/12/31" }],
+  [{ name: "2月份", xAxis: "2025/02/01" }, { xAxis: "2025/02/29" }],
+  [{ name: "4月份", xAxis: "2025/04/01" }, { xAxis: "2025/04/30" }],
+  [{ name: "6月份", xAxis: "2025/06/01" }, { xAxis: "2025/06/30" }],
+  [{ name: "8月份", xAxis: "2025/08/01" }, { xAxis: "2025/08/31" }],
+  [{ name: "10月份", xAxis: "2025/10/01" }, { xAxis: "2025/10/31" }],
+  [{ name: "12月份", xAxis: "2025/12/01" }, { xAxis: "2025/12/31" }],
 ];
 
 // 监听日期(reactive)

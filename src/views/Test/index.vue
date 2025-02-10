@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref,reactive } from "vue";
 function playerState(param) {
   this.name = param.name;
   this.duty = param.duty;
@@ -39,10 +39,11 @@ function worldManager1(str) {
     }
   };
 }
-function worldManager2(str) {
-  this.str = str;
+function worldManager2(params) {
+  this.params = params;
   this.init = function () {
-    let params = { name: "李四", duty: "教师" };
+    let params = params;
+    console.log('prarms',params);
     this.world = worldStateMgr.create(params);
     console.log("???", this.world);
     if (this.world) {
@@ -60,16 +61,23 @@ const handleClick = (tab, event) => {
 onMounted(() => {
   console.log("加载了");
 });
+let inputInfo = reactive({
+  name:'',
+  duty:'',
+})
 
 function createWorld1() {
-  manager1 = new worldManager1("参数1");
+  manager1 = new worldManager1(inputInfo);
   manager1.init();
   worldStateMgr.start();
 }
 function createWorld2() {
-  manager2 = new worldManager2("参数2");
+  manager2 = new worldManager2(inputInfo);
   manager2.init();
   worldStateMgr.start();
+}
+function testHandler() {
+  console.log('测试',inputInfo);
 }
 </script>
 <template>
@@ -82,7 +90,10 @@ function createWorld2() {
     >
       <el-tab-pane label="User" name="first">
         <div class="control">
+          <el-input v-model="inputInfo.name"></el-input>
+          <el-input v-model="inputInfo.duty"></el-input>
           <el-button @click="createWorld1">创建1</el-button>
+          <el-button @click="testHandler">测试</el-button>
         </div>
         <div class="main">
           <div class="world"></div>
@@ -109,6 +120,9 @@ function createWorld2() {
     height: 30px;
     width: 100%;
     border: 1px solid rgb(218, 218, 218);
+    .el-input{
+      max-width: 200px;
+    }
   }
   .main {
     height: 100%;

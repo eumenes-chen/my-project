@@ -222,6 +222,7 @@ defineExpose({
         <div class="calendar-zone">
           <div
             class="calendar-item"
+            :style="{'max-height':tableData.list.length >35 ? '18%' : '22%'}"
             v-for="(item, index) in tableData.list"
             :key="index + '_' + item.date + '_' + item.day"
             :class="{
@@ -318,8 +319,9 @@ defineExpose({
         overflow: hidden;
         .calendar-item {
           flex: 1;
+          flex-shrink: 1;
           min-width: 14%;
-          min-height: 15%;
+          min-height: 16%;
           padding: 12px 10px;
           border: 1px solid rgb(172, 255, 255);
           box-sizing: border-box;
@@ -344,14 +346,14 @@ defineExpose({
             width: 100%;
             border-radius: 4px;
             background: rgba(226, 226, 226, 0.3);
-            height: 24px;
+            // height: 24px;
             color: gray;
             padding: 0 10px;
             box-sizing: border-box;
-            margin: 5px 0;
+            margin: 3px 0;
             overflow: hidden;
             span {
-              line-height: 24px;
+              line-height: 22px;
               font-size: 12px;
             }
           }
